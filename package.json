@@ -1,0 +1,18 @@
+{
+  "name": "express-hrbac-middleware",
+  "version": "1.0.0",
+  "description": "HRBAC middleware for express router",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "keywords": [
+    "hrbac",
+    "acl",
+    "expressjs",
+    "router",
+    "middleware"
+  ],
+  "author": "Giulio Giovannini <giulio.inbox@gmail.com>",
+  "license": "MIT"
+}
