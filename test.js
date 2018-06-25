@@ -8,40 +8,39 @@
 
     let req = {
       user: {
-        roles: ['admin']
+        //roles: ['admin']
+        role: 'admin0'
       },
       route: {
         path: '/admin/delete'
       },
       method: 'PUT',
       params: {
-        groupId: 9
+        groupId: 10
       }
     }
 
-    // let middleware = hrbac.getMiddleware(['admin']);
+    hrbac.addBool('is admin', async (req) => req.user.role == 'admin');
 
-    // if(await middleware(req, null, (err = null) => console.log(err ? err : 'OK'))) {
-    //   console.log('PERMISSION!');
-    // }
+    hrbac.addMiddleware('is admin', hrbac.getBool('is admin'));
 
-    //middleware = hrbac.getMiddleware2().roleIn(['admin']).or.when(async req => req.params.groupId == 10);
+    {
+      let middleware = hrbac.getMiddleware('is admin');
 
-    let middleware = hrbac.getMiddleware3(
-      async (req) => 
-        hrbac.roleIn(req, ['admin']) ||
-        await hrbac.if(req, async req => req.params.groupId == 10)
-    );
+      await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
+    }
 
-    // let middleware = hrbac.getMiddleware3(
-    //   async (req) => {
-    //     console.log('Condition');
-    //     console.log(req);
-    //     return hrbac.roleIn(req, ['admin'])
-    //   }
-    // );
+    hrbac.addBool('is group owner', async (req) => req.params.groupId == 10);
 
-    await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
+    hrbac.addBool('is admin or group owner', hrbac.or('is admin', 'is group owner'));
+
+    hrbac.addMiddleware('is admin or group owner', hrbac.getBool('is admin or group owner'));
+
+    {
+      let middleware = hrbac.getMiddleware('is admin or group owner');
+
+      await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
+    }
 
   } catch (err) {
     console.log(err);
