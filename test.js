@@ -9,7 +9,7 @@
     let req = {
       user: {
         //roles: ['admin']
-        role: 'admin',
+        role: ['admin'],
       },
       route: {
         path: '/admin/delete'
@@ -29,7 +29,7 @@
     hrbac.addRole('guest', ['sfigato1', 'sfigato2']);
 
     {
-      let middleware = hrbac.middleware('guest');
+      let middleware = hrbac.middleware('admin');
 
       await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
     }
