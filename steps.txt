@@ -1,0 +1,2 @@
+- Add check that parents roles must exists
+- Add throw error for function label not existing

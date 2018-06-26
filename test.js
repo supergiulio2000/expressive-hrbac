@@ -9,23 +9,27 @@
     let req = {
       user: {
         //roles: ['admin']
-        role: ['admin', 'user']
+        role: 'admin',
       },
       route: {
         path: '/admin/delete'
       },
       method: 'PUT',
       params: {
-        groupId: 10
+        groupId: 9
       }
     }
 
-    hrbac.addGetRoleFunc(req => req.user.myRole);
+    hrbac.addGetRoleFunc(req => req.user.role);
 
-    hrbac.addRole('admin');
+    hrbac.addRole('admin', ['user1', 'user2']);
+
+    hrbac.addRole('user1', ['guest']);
+
+    hrbac.addRole('guest', ['sfigato1', 'sfigato2']);
 
     {
-      let middleware = hrbac.middleware('admin');
+      let middleware = hrbac.middleware('guest');
 
       await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
     }
