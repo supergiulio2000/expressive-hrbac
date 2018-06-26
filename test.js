@@ -16,7 +16,7 @@
       },
       method: 'PUT',
       params: {
-        groupId: 10
+        groupId: 9
       }
     }
 
@@ -36,10 +36,6 @@
 
     hrbac.addRole('user');
 
-    //hrbac.addBoolFunc('is admin or group owner', hrbac.or('admin', 'is group owner'));
-
-    //hrbac.addMiddleware('is admin or group owner', hrbac.getBool('is admin or group owner'));
-
     hrbac.addBoolFunc(
       'is admin or group owner',
       hrbac.or('admin', hrbac.and('user', 'is group owner'))
@@ -51,7 +47,11 @@
       await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
     }
 
+    {
+      let middleware = hrbac.generateMiddleware(hrbac.not('is admin or group owner'));
 
+      await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
+    }
   } catch (err) {
     console.log(err);
   }
