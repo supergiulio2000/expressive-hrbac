@@ -9,30 +9,28 @@
     let req = {
       user: {
         //roles: ['admin']
-        role: ['admino', 'user']
+        role: ['admin', 'user']
       },
       route: {
         path: '/admin/delete'
       },
       method: 'PUT',
       params: {
-        groupId: 9
+        groupId: 10
       }
     }
+
+    hrbac.addGetRoleFunc(req => req.user.myRole);
 
     hrbac.addRole('admin');
 
     {
-      let middleware = hrbac.generateMiddleware('admin');
+      let middleware = hrbac.middleware('admin');
 
       await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
     }
 
-    hrbac.addBoolFunc('is group owner', async (req) => {
-
-      console.log(req.params.groupId);
-      return req.params.groupId == 10
-    });
+    hrbac.addBoolFunc('is group owner', async (req) => req.params.groupId == 10);
 
     hrbac.addRole('user');
 
@@ -42,13 +40,13 @@
     );
 
     {
-      let middleware = hrbac.generateMiddleware('is admin or group owner');
+      let middleware = hrbac.middleware('is admin or group owner');
 
       await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
     }
 
     {
-      let middleware = hrbac.generateMiddleware(hrbac.not('is admin or group owner'));
+      let middleware = hrbac.middleware(hrbac.not('is admin or group owner'));
 
       await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
     }
