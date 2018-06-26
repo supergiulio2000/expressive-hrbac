@@ -9,7 +9,7 @@
     let req = {
       user: {
         //roles: ['admin']
-        role: ['admino', 'usero']
+        role: ['admino', 'user']
       },
       route: {
         path: '/admin/delete'
