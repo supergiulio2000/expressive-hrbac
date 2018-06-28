@@ -47,7 +47,7 @@
 
     hrbac.addBoolFunc(
       'is admin or group owner',
-      hrbac.or('admin', hrbac.and('user', 'is group owner'))
+      hrbac.or('admin', hrbac.and('user',  'is group owner'))
     );
 
     {
