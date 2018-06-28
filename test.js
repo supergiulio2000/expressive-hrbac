@@ -20,7 +20,7 @@
       }
     }
 
-    hrbac.addGetRoleFunc(req => req.user.role);
+    hrbac.addGetRoleFunc((req, res) => req.user.role);
 
     hrbac.addRole('sfigato1');
 
@@ -41,7 +41,7 @@
       await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
     }
 
-    hrbac.addBoolFunc('is group owner', async (req) => req.params.groupId == 10);
+    hrbac.addBoolFunc('is group owner', async (req, res) => req.params.groupId == 10);
 
     hrbac.addRole('user');
 

@@ -14,13 +14,6 @@ response = {};
 describe('rules', () => {
 
   beforeEach(() => {
-    request = httpMocks.createRequest({
-      method: 'GET',
-      url: '/test/path?myid=312',
-      query: {
-          myid: '312'
-      }
-    });
   });
 
   afterEach(() => {
@@ -28,6 +21,14 @@ describe('rules', () => {
 
   describe('should GRANT', () => {
     it('GRANT to admin', async () => {
+      request = httpMocks.createRequest({
+        method: 'GET',
+        url: '/test/path?myid=312',
+        query: {
+            myid: '312'
+        }
+      });
+      
       //hrbac.addRole('admin', ['user1', 'user2']);
       'ciccio'.should.eql('ciccio');
     });
