@@ -4,7 +4,7 @@
   "description": "HRBAC middleware for express router",
   "main": "lib/index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "./node_modules/mocha/bin/_mocha"
   },
   "keywords": [
     "hrbac",
@@ -14,5 +14,11 @@
     "middleware"
   ],
   "author": "Giulio Giovannini <giulio.inbox@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "3.5.0",
+    "chai-http": "3.0.0",
+    "mocha": "3.0.2",
+    "node-mocks-http": "^1.7.0"
+  }
 }

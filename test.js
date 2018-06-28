@@ -22,11 +22,18 @@
 
     hrbac.addGetRoleFunc(req => req.user.role);
 
-    hrbac.addRole('admin', ['user1', 'user2']);
+    hrbac.addRole('sfigato1');
+
+    hrbac.addRole('sfigato2');
+
+    hrbac.addRole('guest', ['sfigato1', 'sfigato2']);
 
     hrbac.addRole('user1', ['guest']);
 
-    hrbac.addRole('guest', ['sfigato1', 'sfigato2']);
+    hrbac.addRole('user2');
+
+    hrbac.addRole('admin', ['user1', 'user2']);
+
 
     {
       let middleware = hrbac.middleware('admin');
