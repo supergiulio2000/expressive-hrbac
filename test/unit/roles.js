@@ -79,7 +79,24 @@ describe('Role admin without parent', () => {
 
       req = {
         user: {
-          role: ['user'],
+          role: 'user',
+        },
+        route: {
+          path: '/admin/delete'
+        },
+        method: 'PUT',
+      };
+
+      await middleware(req, null, (err = null) => {
+        expect(err).to.not.eql(null);
+      });
+    });
+
+    it('DENY to user in array', async () => {
+
+      req = {
+        user: {
+          role: ['user', 'user1'],
         },
         route: {
           path: '/admin/delete'
@@ -114,14 +131,14 @@ describe('Role admin without parent', () => {
   });
 });
 
-describe('Role admin2 with single parent', () => {
+describe('Role with single parent', () => {
 
   it('Non existant parent throws error', async () => {
 
     expect(hrbac.addRole.bind(hrbac, 'admin2', 'admin3')).to.throw();
   });
 
-  it('admin2 should access route for its parent admin3', async () => {
+  it('Role should access route for its parent', async () => {
 
     hrbac.addRole('admin3');
 
@@ -144,7 +161,7 @@ describe('Role admin2 with single parent', () => {
     });
   });
 
-  it('admin6 should access route for its ancestor admin4', async () => {
+  it('Role should access route for its ancestor', async () => {
 
     hrbac.addRole('admin4');
 
@@ -168,4 +185,88 @@ describe('Role admin2 with single parent', () => {
       expect(err).to.eql(null);
     });
   });
+});
+
+describe('Role with array of parents', () => {
+
+  it('Non existant parent throws error', async () => {
+
+    expect(hrbac.addRole.bind(hrbac, 'admin7', ['admin8', 'admin9'])).to.throw();
+  });
+
+  it('Role should access route for its parent in array', async () => {
+
+    hrbac.addRole('admin8');
+    hrbac.addRole('admin9');
+
+    hrbac.addRole('admin7', ['admin8', 'admin9']);
+
+    middleware = hrbac.middleware('admin9');
+
+    req = {
+      user: {
+        role: ['admin7'],
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.eql(null);
+    });
+  });
+
+  it('Role should access route for its ancestor in array', async () => {
+
+    hrbac.addRole('admin10');
+    hrbac.addRole('admin11');
+
+    hrbac.addRole('admin12', ['admin10', 'admin11']);
+
+    hrbac.addRole('admin13');
+
+    hrbac.addRole('admin14', ['admin12', 'admin13']);
+
+    middleware = hrbac.middleware('admin9');
+
+    req = {
+      user: {
+        role: ['admin7'],
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.eql(null);
+    });
+  });
+
+  // it('Role should not access route if no ancestor has access', async () => {
+
+  //   hrbac.addRole('admin8');
+  //   hrbac.addRole('admin9');
+
+  //   hrbac.addRole('admin7', ['admin8', 'admin9']);
+
+  //   middleware = hrbac.middleware('admin9');
+
+  //   req = {
+  //     user: {
+  //       role: ['admin7'],
+  //     },
+  //     route: {
+  //       path: '/admin/delete'
+  //     },
+  //     method: 'PUT',
+  //   };
+
+  //   await middleware(req, null, (err = null) => {
+  //     expect(err).to.eql(null);
+  //   });
+  // });
 });
