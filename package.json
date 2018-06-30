@@ -1,7 +1,7 @@
 {
   "name": "expressive-hrbac",
   "version": "1.0.0",
-  "description": "Hierarchical Role-Basec Access middleware for expressjs",
+  "description": "Hierarchical Role-Based Access Control middleware for expressjs",
   "main": "lib/hrbac.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha"
