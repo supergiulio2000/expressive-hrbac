@@ -5,6 +5,7 @@
   try {
 
     const hrbac = require('./lib/index');
+    const HRBAC = require('./lib/hrbac');
 
     let req = {
       user: {
@@ -58,6 +59,31 @@
 
     {
       let middleware = hrbac.middleware(hrbac.not('is admin or group owner'));
+
+      await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
+    }
+
+    let hrbac2 = new HRBAC();
+
+    hrbac2.addRole('admin');
+
+    {
+      let middleware = hrbac2.middleware('admin');
+
+      await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
+    }
+
+    hrbac2.addBoolFunc('is group owner', async (req, res) => req.params.groupId == 10);
+
+    hrbac2.addRole('user');
+
+    hrbac2.addBoolFunc(
+      'is admin or group owner',
+      hrbac2.or('admin', hrbac2.and('user',  'is group owner'))
+    );
+
+    {
+      let middleware = hrbac2.middleware('is admin or group owner');
 
       await middleware(req, null, (err = null) => console.log(err ? err : 'OK'));
     }

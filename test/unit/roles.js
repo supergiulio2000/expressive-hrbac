@@ -6,7 +6,7 @@ var assert = require('assert');
 var expect = chai.expect;
 const httpMocks = require('node-mocks-http');
 
-let hrbac = require('../../lib/index');
+const HRBAC = require('../../lib/hrbac');
 let middleware = null;
 
 request = {};
@@ -14,13 +14,11 @@ response = {};
 
 describe('Role admin without parent', () => {
 
-  before(function() {
+  beforeEach(() => {
+    let hrbac = new HRBAC();
+  });
 
-    hrbac.addRole('admin');
-
-    hrbac.addBoolFunc('test_func1', (req, res) => console.log('Test'));
-
-    middleware = hrbac.middleware('admin');
+  afterEach(() => {
   });
 
   describe('should GRANT to admin', () => {
@@ -35,6 +33,10 @@ describe('Role admin without parent', () => {
         },
         method: 'PUT',
       };
+
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
 
       await middleware(req, null, (err = null) => {
         expect(err).to.eql(null);
@@ -53,6 +55,10 @@ describe('Role admin without parent', () => {
         method: 'PUT',
       };
 
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
+
       await middleware(req, null, (err = null) => {
         expect(err).to.eql(null);
       });
@@ -69,6 +75,10 @@ describe('Role admin without parent', () => {
         },
         method: 'PUT',
       };
+
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
 
       await middleware(req, null, (err = null) => {
         expect(err).to.eql(null);
@@ -87,6 +97,10 @@ describe('Role admin without parent', () => {
         method: 'PUT',
       };
 
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
+
       await middleware(req, null, (err = null) => {
         expect(err).to.not.eql(null);
       });
@@ -103,6 +117,10 @@ describe('Role admin without parent', () => {
         },
         method: 'PUT',
       };
+
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
 
       await middleware(req, null, (err = null) => {
         expect(err).to.not.eql(null);
@@ -121,10 +139,14 @@ describe('Role admin without parent', () => {
 
     it('Redifining admin role should throw error', async () => {
 
+      hrbac.addRole('admin');
+
       expect(hrbac.addRole.bind(hrbac, 'admin')).to.throw();
     });
 
     it('Defining role named as function throws error', async () => {
+
+      hrbac.addBoolFunc('test_func1');
 
       expect(hrbac.addRole.bind(hrbac, 'test_func1')).to.throw();
     });
@@ -132,6 +154,13 @@ describe('Role admin without parent', () => {
 });
 
 describe('Role with single parent', () => {
+
+  beforeEach(() => {
+    hrbac = new HRBAC();
+  });
+
+  afterEach(() => {
+  });
 
   it('Non existant parent throws error', async () => {
 
