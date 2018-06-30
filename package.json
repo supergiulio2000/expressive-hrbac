@@ -1,8 +1,8 @@
 {
-  "name": "express-hrbac-middleware",
+  "name": "expressive-hrbac",
   "version": "1.0.0",
-  "description": "HRBAC middleware for express router",
-  "main": "lib/index.js",
+  "description": "Hierarchical Role-Basec Access middleware for expressjs",
+  "main": "lib/hrbac.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha"
   },
