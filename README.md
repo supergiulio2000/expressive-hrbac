@@ -13,6 +13,15 @@
   - [Roles](#roles)
   - [Role inheritance](#role-inheritance)
 - [Methods](#methods)
+  - [addRole(role, parents = null)](#addrolerole-parents--null)
+  - [addGetRoleFunc(func)](#addgetrolefuncfunc)
+  - [addBoolFunc(label, func)](#addboolfunclabel-func)
+  - [or(func1, func2)](#orfunc1-func2)
+  - [and(func1, func2)](#andfunc1-func2)
+  - [not(func)](#notfunc)
+  - [middleware(func)](#middlewarefunc)
+- [Utilities](#utilities)
+  - [Generate README.md table of contents](#generate-readmemd-table-of-contents)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -149,16 +158,113 @@ hrbac.addRole('superadmin', ['admin', 'blog_admin']);
 ```
 # Methods
 
+## addRole(role, parents = null)
+Adds a role to the HRBAC instance
+
+**Parameters**:
+-   `role`: [**string**] - The role string to be added
+-   `parents`: [**string | string[]**] - The parent role or array of parent roles for this role
+
+**Returns**:
+-   [**HRBAC**] current HRBAC instance.
+
+**Throws**:
+-   `NullParameterError`: When `role` is null
+-   `EmptyParameterError`: When `role` is empty string
+-   `RoleAlreadyExistsError`: If `role` already exists
+-   `LabelAlreadyInUseError`: If `role` has already been used as label
+-   `MissingRoleError`: If any parent role has not been added yet
+
 ## addGetRoleFunc(func)
+Adds a function to get the role from the request object
 
-## addRole(role, parents = null) {
+**Parameters**:
+-   `func`: [**sync/async function**] - Function to be called
 
-  addBoolFunc(label, func) {
+**Returns**:
+-   [**HRBAC**] current HRBAC instance.
 
-  or(func1, func2) {
+**Throws**: none
 
-  and(func1, func2) {
 
-  not(func) {
+## addBoolFunc(label, func)
+Adds a boolean function and associates it to the provided label
 
-  middleware(func) {
+**Parameters**:
+-   `label`: [**string**] - The label to associate the function to
+-   `func`: [**sync/async function**] - Function to be called
+
+**Returns**:
+-   [**HRBAC**] current HRBAC instance.
+
+**Throws**:
+-   `NullParameterError`: When `label` or `func` is null
+-   `EmptyParameterError`: When `label` or ' is empty string
+-   `LabelAlreadyInUseError`: If `label` has already been used as label or role
+
+## or(func1, func2)
+Combines two function with boolean OR
+
+**Parameters**:
+-   `func1`: [**string | sync/async function**] - Function label or actual function
+-   `func2`: [**string | sync/async function**] - Function label or actual function
+
+**Returns**:
+-   [**sync/async function**] - Combined function
+
+**Throws**:
+-   `NullParameterError`: When `func1` or `func2` is null
+-   `EmptyParameterError`: When `func1` or `func2` is a empty string
+-   `MissingFunctionError`: If `func1` or `func2` is a string but is not associated to a function
+
+## and(func1, func2)
+Combines two function with boolean AND
+
+**Parameters**:
+-   `func1`: [**string | sync/async function**] - Function label or actual function
+-   `func2`: [**string | sync/async function**] - Function label or actual function
+
+**Returns**:
+-   [**sync/async function**] - Combined function
+
+**Throws**:
+-   `NullParameterError`: When `func1` or `func2` is null
+-   `EmptyParameterError`: When `func1` or `func2` is a empty string
+-   `MissingFunctionError`: If `func1` or `func2` is a string but is not associated to a function
+
+## not(func)
+Returnes negated function
+
+**Parameters**:
+-   `func`: [**string | sync/async function**] - Function label or actual function
+
+**Returns**:
+-   [**sync/async function**] - Negated function
+
+**Throws**:
+-   `NullParameterError`: When `func` is null
+-   `EmptyParameterError`: When `func` is a empty string
+-   `MissingFunctionError`: If `func` is a string but is not associated to a function
+
+## middleware(func)
+Returnes middleware from function
+
+**Parameters**:
+-   `func`: [**string | sync/async function**] - Function label or actual function
+
+**Returns**:
+-   [**sync/async function**] - middleware
+
+**Throws**:
+-   `NullParameterError`: When `func` is null
+-   `EmptyParameterError`: When `func` is a empty string
+-   `MissingFunctionError`: If `func` is a string but is not associated to a function
+
+# Utilities
+## Generate README.md table of contents
+
+Install doctoc from npm the add ToC to markdown file.
+
+```bash
+doctoc README.md
+```

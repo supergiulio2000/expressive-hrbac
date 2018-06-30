@@ -7,11 +7,12 @@ var expect = chai.expect;
 
 const HRBAC = require('../../lib/hrbac');
 
-const NullParameterError     = require('../../lib/errors/NullParameterError');
-const EmptyParameterError    = require('../../lib/errors/EmptyParameterError');
-const LabelAlreadyInUseError = require('../../lib/errors/LabelAlreadyInUseError');
-const RoleAlreadyExistsError = require('../../lib/errors/RoleAlreadyExistsError');
-const MissingRoleError       = require('../../lib/errors/MissingRoleError');
+const NullParameterError       = require('../../lib/errors/NullParameterError');
+const EmptyParameterError      = require('../../lib/errors/EmptyParameterError');
+const LabelAlreadyInUseError   = require('../../lib/errors/LabelAlreadyInUseError');
+const RoleAlreadyExistsError   = require('../../lib/errors/RoleAlreadyExistsError');
+const MissingRoleError         = require('../../lib/errors/MissingRoleError');
+const UndefinedParameterError  = require('../../lib/errors/UndefinedParameterError');
 
 let hrbac;
 
@@ -152,7 +153,7 @@ describe('Role admin without parent', () => {
 
     it('Defining role named as function throws error', async () => {
 
-      hrbac.addBoolFunc('test_func1');
+      hrbac.addBoolFunc('test_func1', () => 5);
 
       expect(hrbac.addRole.bind(hrbac, 'test_func1')).to.throw(LabelAlreadyInUseError);
     });
