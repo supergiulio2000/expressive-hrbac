@@ -16,7 +16,7 @@ response = {};
 
 describe('Singleton', () => {
 
-  it.only('Throws RoleAlreadyEsists when you get instance twice and create same role', async () => {
+  it('Throws RoleAlreadyEsists when you get instance twice and create same role', async () => {
 
     hrbac = HRBAC.getInstance();
 
@@ -27,7 +27,7 @@ describe('Singleton', () => {
     expect(hrbac.addRole.bind(hrbac, 'admin')).to.throw(RoleAlreadyExistsError);
   });
 
-  it.only('Throws RoleAlreadyEsists when you get the same instance using label twice and create same role', async () => {
+  it('Throws RoleAlreadyEsists when you get the same instance using label twice and create same role', async () => {
 
     hrbac = HRBAC.getInstance('gino');
 
@@ -38,7 +38,7 @@ describe('Singleton', () => {
     expect(hrbac.addRole.bind(hrbac, 'admin')).to.throw(RoleAlreadyExistsError);
   });
 
-  it.only('Does not throws RoleAlreadyEsists when you get diffrent instance using label and create same role', async () => {
+  it('Does not throws RoleAlreadyEsists when you get diffrent instance using label and create same role', async () => {
 
     hrbac = HRBAC.getInstance('rino');
 
