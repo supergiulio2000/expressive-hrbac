@@ -13,11 +13,52 @@ const LabelAlreadyInUseError   = require('../../lib/errors/LabelAlreadyInUseErro
 const RoleAlreadyExistsError   = require('../../lib/errors/RoleAlreadyExistsError');
 const MissingRoleError         = require('../../lib/errors/MissingRoleError');
 const UndefinedParameterError  = require('../../lib/errors/UndefinedParameterError');
+const NotAStringError          = require('../../lib/errors/NotAStringError');
 
 let hrbac;
 
 request = {};
 response = {};
+
+describe('Role error throwing:', () => {
+  beforeEach(() => {
+    hrbac = new HRBAC();
+  });
+
+  it('Undef role throws error', async () => {
+
+    expect(hrbac.addRole.bind(hrbac)).to.throw(UndefinedParameterError);
+  });
+
+  it('Null role throws error', async () => {
+
+    expect(hrbac.addRole.bind(hrbac, null)).to.throw(NullParameterError);
+  });
+
+  it('Empty role throws error', async () => {
+
+    expect(hrbac.addRole.bind(hrbac, '')).to.throw(EmptyParameterError);
+  });
+
+  it('Parameter must be a string', async () => {
+
+    expect(hrbac.addRole.bind(hrbac, 5)).to.throw(NotAStringError);
+  });
+
+  it('Redifining admin role should throw error', async () => {
+
+    hrbac.addRole('admin');
+
+    expect(hrbac.addRole.bind(hrbac, 'admin')).to.throw(RoleAlreadyExistsError);
+  });
+
+  it('Defining role named as function throws error', async () => {
+
+    hrbac.addBoolFunc('test_func1', () => 5);
+
+    expect(hrbac.addRole.bind(hrbac, 'test_func1')).to.throw(LabelAlreadyInUseError);
+  });
+});
 
 describe('Role admin without parent', () => {
 
@@ -132,30 +173,6 @@ describe('Role admin without parent', () => {
       await middleware(req, null, (err = null) => {
         expect(err).to.not.eql(null);
       });
-    });
-
-    it('Null role throws error', async () => {
-
-      expect(hrbac.addRole.bind(hrbac, null)).to.throw(NullParameterError);
-    });
-
-    it('Empty role throws error', async () => {
-
-      expect(hrbac.addRole.bind(hrbac, '')).to.throw(EmptyParameterError);
-    });
-
-    it('Redifining admin role should throw error', async () => {
-
-      hrbac.addRole('admin');
-
-      expect(hrbac.addRole.bind(hrbac, 'admin')).to.throw(RoleAlreadyExistsError);
-    });
-
-    it('Defining role named as function throws error', async () => {
-
-      hrbac.addBoolFunc('test_func1', () => 5);
-
-      expect(hrbac.addRole.bind(hrbac, 'test_func1')).to.throw(LabelAlreadyInUseError);
     });
   });
 });
