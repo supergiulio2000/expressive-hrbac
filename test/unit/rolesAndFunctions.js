@@ -24,8 +24,8 @@ describe('Role and Complex function combination', () => {
   it('Basic OR with role and lamda functions', async () => {
 
     hrbac.addRole('admin');
-    hrbac.addBoolFunc('is user', () => req.user.role === 'user');
-    hrbac.addBoolFunc('is PUT', () => req.method === 'PUT');
+    hrbac.addBoolFunc('is user', (req, res) => req.user.role === 'user');
+    hrbac.addBoolFunc('is PUT', (req, res) => req.method === 'PUT');
 
     hrbac.addBoolFunc('func', hrbac.or('admin', hrbac.and('is user', hrbac.not('is PUT'))));
 

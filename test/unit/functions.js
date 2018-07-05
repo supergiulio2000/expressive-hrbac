@@ -377,57 +377,57 @@ describe('Basic Function combination', () => {
 
   it('Basic OR with direct functions', async () => {
 
-    middleware = hrbac.middleware(hrbac.or(() => req.user.role === 'admin', () => req.method === 'PUT'));
+    middleware = hrbac.middleware(hrbac.or((req, res) => req.user.role === 'admin', (req, res) => req.method === 'PUT'));
 
     await ORTests(middleware);
   });
 
   it('Basic OR with arg1 = label function and arg2 = lambda functions', async () => {
 
-    hrbac.addBoolFunc('is admin', () => req.user.role === 'admin');
+    hrbac.addBoolFunc('is admin', (req, res) => req.user.role === 'admin');
 
-    middleware = hrbac.middleware(hrbac.or('is admin', () => req.method === 'PUT'));
+    middleware = hrbac.middleware(hrbac.or('is admin', (req, res) => req.method === 'PUT'));
 
     await ORTests(middleware);
   });
 
   it('Basic OR with arg1 = lambda function and arg2 = label functions', async () => {
 
-    hrbac.addBoolFunc('is PUT', () => req.method === 'PUT');
+    hrbac.addBoolFunc('is PUT', (req, res) => req.method === 'PUT');
 
-    middleware = hrbac.middleware(hrbac.or(() => req.user.role === 'admin', 'is PUT'));
+    middleware = hrbac.middleware(hrbac.or((req, res) => req.user.role === 'admin', 'is PUT'));
 
     await ORTests(middleware);
   });
 
   it('Basic AND with direct functions', async () => {
 
-    middleware = hrbac.middleware(hrbac.and(() => req.user.role === 'admin', () => req.method === 'PUT'));
+    middleware = hrbac.middleware(hrbac.and((req, res) => req.user.role === 'admin', (req, res) => req.method === 'PUT'));
 
     await ANDTests(middleware);
   });
 
   it('Basic AND with arg1 = label function and arg2 = lambda functions', async () => {
 
-    hrbac.addBoolFunc('is admin', () => req.user.role === 'admin');
+    hrbac.addBoolFunc('is admin', (req, res) => req.user.role === 'admin');
 
-    middleware = hrbac.middleware(hrbac.and('is admin', () => req.method === 'PUT'));
+    middleware = hrbac.middleware(hrbac.and('is admin', (req, res) => req.method === 'PUT'));
 
     await ANDTests(middleware);
   });
 
   it('Basic AND with arg1 = lambda function and arg2 = label functions', async () => {
 
-    hrbac.addBoolFunc('is PUT', () => req.method === 'PUT');
+    hrbac.addBoolFunc('is PUT', (req, res) => req.method === 'PUT');
 
-    middleware = hrbac.middleware(hrbac.and(() => req.user.role === 'admin', 'is PUT'));
+    middleware = hrbac.middleware(hrbac.and((req, res) => req.user.role === 'admin', 'is PUT'));
 
     await ANDTests(middleware);
   });
 
   it('Basic NOT with direct functions', async () => {
 
-    middleware = hrbac.middleware(hrbac.not(() => req.user.role === 'admin'));
+    middleware = hrbac.middleware(hrbac.not((req, res) => req.user.role === 'admin'));
 
     req = {
       user: {
@@ -460,7 +460,7 @@ describe('Basic Function combination', () => {
 
   it('Basic NOT with label functions', async () => {
 
-    hrbac.addBoolFunc('is admin', () => req.user.role === 'admin');
+    hrbac.addBoolFunc('is admin', (req, res) => req.user.role === 'admin');
 
     middleware = hrbac.middleware(hrbac.not('is admin'));
 
@@ -505,9 +505,9 @@ describe('Complex function combination', () => {
 
   it('Basic OR with direct functions', async () => {
 
-    hrbac.addBoolFunc('is admin', () => req.user.role === 'admin');
-    hrbac.addBoolFunc('is user', () => req.user.role === 'user');
-    hrbac.addBoolFunc('is PUT', () => req.method === 'PUT');
+    hrbac.addBoolFunc('is admin', (req, res) => req.user.role === 'admin');
+    hrbac.addBoolFunc('is user', (req, res) => req.user.role === 'user');
+    hrbac.addBoolFunc('is PUT', (req, res) => req.method === 'PUT');
 
     hrbac.addBoolFunc('func', hrbac.or('is admin', hrbac.and('is user', hrbac.not('is PUT'))));
 
