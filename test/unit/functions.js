@@ -5,13 +5,14 @@ const should = chai.should();
 var assert = require('assert');
 var expect = chai.expect;
 
-const NullParameterError       = require('../../lib/errors/NullParameterError');
-const EmptyParameterError      = require('../../lib/errors/EmptyParameterError');
-const LabelAlreadyInUseError   = require('../../lib/errors/LabelAlreadyInUseError');
-const MissingFunctionError     = require('../../lib/errors/MissingFunctionError');
-const UndefinedParameterError  = require('../../lib/errors/UndefinedParameterError');
-const NotAStringError          = require('../../lib/errors/NotAStringError');
-const NotAFunctionError        = require('../../lib/errors/NotAFunctionError');
+const NullParameterError            = require('../../lib/errors/NullParameterError');
+const EmptyParameterError           = require('../../lib/errors/EmptyParameterError');
+const LabelAlreadyInUseError        = require('../../lib/errors/LabelAlreadyInUseError');
+const MissingFunctionError          = require('../../lib/errors/MissingFunctionError');
+const UndefinedParameterError       = require('../../lib/errors/UndefinedParameterError');
+const NotAStringError               = require('../../lib/errors/NotAStringError');
+const NotAFunctionError             = require('../../lib/errors/NotAFunctionError');
+const ParameterNumberMismatchError  = require('../../lib/errors/ParameterNumberMismatchError');
 
 const HRBAC = require('../../lib/hrbac');
 
@@ -61,18 +62,25 @@ describe('addBoolFunc error throwing:', () => {
     expect(hrbac.addBoolFunc.bind(hrbac, 'ciccio', 'rocco')).to.throw(NotAFunctionError);
   });
 
+  it('Bool functions take 2 arguments', async () => {
+
+    expect(hrbac.addBoolFunc.bind(hrbac, 'ciccio', () => 5)).to.throw(ParameterNumberMismatchError);
+    expect(hrbac.addBoolFunc.bind(hrbac, 'ciccio', (req) => 5)).to.throw(ParameterNumberMismatchError);
+    expect(hrbac.addBoolFunc.bind(hrbac, 'ciccio', (req, res, ciccio) => 5)).to.throw(ParameterNumberMismatchError);
+  });
+
   it('Redifining label for function role should throw error', async () => {
 
-    hrbac.addBoolFunc('func', () => 5);
+    hrbac.addBoolFunc('func', (req, res) => 5);
 
-    expect(hrbac.addBoolFunc.bind(hrbac, 'func', () => 6)).to.throw(LabelAlreadyInUseError);
+    expect(hrbac.addBoolFunc.bind(hrbac, 'func', (req, res) => 6)).to.throw(LabelAlreadyInUseError);
   });
 
   it('Using role as label for function role should throw error', async () => {
 
     hrbac.addRole('admin');
 
-    expect(hrbac.addBoolFunc.bind(hrbac, 'admin', () => 6)).to.throw(LabelAlreadyInUseError);
+    expect(hrbac.addBoolFunc.bind(hrbac, 'admin', (req, res) => 6)).to.throw(LabelAlreadyInUseError);
   });
 });
 
@@ -157,22 +165,22 @@ describe('OR function error throwing:', () => {
 
   it('Undef second argument throws error', async () => {
 
-    expect(hrbac.or.bind(hrbac, () => 5)).to.throw(UndefinedParameterError);
+    expect(hrbac.or.bind(hrbac, (req, res) => 5)).to.throw(UndefinedParameterError);
   });
 
   it('Null second argument throws error', async () => {
 
-    expect(hrbac.or.bind(hrbac, () => 5, null)).to.throw(NullParameterError);
+    expect(hrbac.or.bind(hrbac, (req, res) => 5, null)).to.throw(NullParameterError);
   });
 
   it('Second argument must be a function', async () => {
 
-    expect(hrbac.or.bind(hrbac, () => 5, 5)).to.throw(NotAFunctionError);
+    expect(hrbac.or.bind(hrbac, (req, res) => 5, 5)).to.throw(NotAFunctionError);
   });
 
   it('If second argument is a string it must correspond to a function', async () => {
 
-    expect(hrbac.or.bind(hrbac, () => 5, 'func2')).to.throw(MissingFunctionError);
+    expect(hrbac.or.bind(hrbac, (req, res) => 5, 'func2')).to.throw(MissingFunctionError);
   });
 });
 
@@ -204,22 +212,22 @@ describe('AND function error throwing:', () => {
 
   it('Undef second argument throws error', async () => {
 
-    expect(hrbac.and.bind(hrbac, () => 5)).to.throw(UndefinedParameterError);
+    expect(hrbac.and.bind(hrbac, (req, res) => 5)).to.throw(UndefinedParameterError);
   });
 
   it('Null second argument throws error', async () => {
 
-    expect(hrbac.and.bind(hrbac, () => 5, null)).to.throw(NullParameterError);
+    expect(hrbac.and.bind(hrbac, (req, res) => 5, null)).to.throw(NullParameterError);
   });
 
   it('Second argument must be a function', async () => {
 
-    expect(hrbac.and.bind(hrbac, () => 5, 5)).to.throw(NotAFunctionError);
+    expect(hrbac.and.bind(hrbac, (req, res) => 5, 5)).to.throw(NotAFunctionError);
   });
 
   it('If second argument is a string it must correspond to a function', async () => {
 
-    expect(hrbac.and.bind(hrbac, () => 5, 'func2')).to.throw(MissingFunctionError);
+    expect(hrbac.and.bind(hrbac, (req, res) => 5, 'func2')).to.throw(MissingFunctionError);
   });
 });
 

@@ -14,6 +14,7 @@ const RoleAlreadyExistsError   = require('../../lib/errors/RoleAlreadyExistsErro
 const MissingRoleError         = require('../../lib/errors/MissingRoleError');
 const UndefinedParameterError  = require('../../lib/errors/UndefinedParameterError');
 const NotAStringError          = require('../../lib/errors/NotAStringError');
+const ParameterNumberMismatchError  = require('../../lib/errors/ParameterNumberMismatchError');
 
 let hrbac;
 
@@ -55,7 +56,7 @@ describe('Role error throwing:', () => {
 
   it('Defining role named as function throws error', async () => {
 
-    hrbac.addBoolFunc('test_func1', () => 5);
+    hrbac.addBoolFunc('test_func1', (req, res) => 5);
 
     expect(hrbac.addRole.bind(hrbac, 'test_func1')).to.throw(LabelAlreadyInUseError);
   });
@@ -187,6 +188,13 @@ describe('addGetRoleFunc', () => {
   });
 
   afterEach(() => {
+  });
+
+  it('Function takes 2 arguments', async () => {
+
+    expect(hrbac.addGetRoleFunc.bind(hrbac, () => 5)).to.throw(ParameterNumberMismatchError);
+    expect(hrbac.addGetRoleFunc.bind(hrbac, (req) => 5)).to.throw(ParameterNumberMismatchError);
+    expect(hrbac.addGetRoleFunc.bind(hrbac, (req, res, ciccio) => 5)).to.throw(ParameterNumberMismatchError);
   });
 
   describe('should GRANT to admin', () => {
