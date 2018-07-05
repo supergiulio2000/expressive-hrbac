@@ -178,6 +178,125 @@ describe('Role admin without parent', () => {
   });
 });
 
+describe('addGetRoleFunc', () => {
+
+  beforeEach(() => {
+    hrbac = new HRBAC();
+
+    hrbac.addGetRoleFunc((req, res) => req.user.myrole)
+  });
+
+  afterEach(() => {
+  });
+
+  describe('should GRANT to admin', () => {
+    it('GRANT to admin', async () => {
+
+      req = {
+        user: {
+          myrole: 'admin',
+        },
+        route: {
+          path: '/admin/delete'
+        },
+        method: 'PUT',
+      };
+
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
+
+      await middleware(req, null, (err = null) => {
+        expect(err).to.eql(null);
+      });
+    });
+
+    it('GRANT to admin role in array', async () => {
+
+      req = {
+        user: {
+          myrole: ['admin'],
+        },
+        route: {
+          path: '/admin/delete'
+        },
+        method: 'PUT',
+      };
+
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
+
+      await middleware(req, null, (err = null) => {
+        expect(err).to.eql(null);
+      });
+    });
+
+    it('GRANT to admin role in array with other roles', async () => {
+
+      req = {
+        user: {
+          myrole: ['user1', 'admin', 'user2'],
+        },
+        route: {
+          path: '/admin/delete'
+        },
+        method: 'PUT',
+      };
+
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
+
+      await middleware(req, null, (err = null) => {
+        expect(err).to.eql(null);
+      });
+    });
+
+    it('DENY to user', async () => {
+
+      req = {
+        user: {
+          myrole: 'user',
+        },
+        route: {
+          path: '/admin/delete'
+        },
+        method: 'PUT',
+      };
+
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
+
+      await middleware(req, null, (err = null) => {
+        expect(err).to.not.eql(null);
+      });
+    });
+
+    it('DENY to user in array', async () => {
+
+      req = {
+        user: {
+          myrole: ['user', 'user1'],
+        },
+        route: {
+          path: '/admin/delete'
+        },
+        method: 'PUT',
+      };
+
+      hrbac.addRole('admin');
+
+      middleware = hrbac.middleware('admin');
+
+      await middleware(req, null, (err = null) => {
+        expect(err).to.not.eql(null);
+      });
+    });
+  });
+});
+
 describe('Role with single parent', () => {
 
   beforeEach(() => {

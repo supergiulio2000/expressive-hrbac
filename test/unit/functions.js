@@ -366,7 +366,7 @@ let ANDTests = async (middleware) => {
   });
 };
 
-describe.only('Function combination', () => {
+describe('Basic Function combination', () => {
 
   beforeEach(() => {
     hrbac = new HRBAC();
@@ -461,7 +461,7 @@ describe.only('Function combination', () => {
   it('Basic NOT with label functions', async () => {
 
     hrbac.addBoolFunc('is admin', () => req.user.role === 'admin');
-    
+
     middleware = hrbac.middleware(hrbac.not('is admin'));
 
     req = {
@@ -481,6 +481,69 @@ describe.only('Function combination', () => {
     req = {
       user: {
         role: 'admin',
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+    });
+  });
+});
+
+describe('Complex function combination', () => {
+
+  beforeEach(() => {
+    hrbac = new HRBAC();
+  });
+
+  afterEach(() => {
+  });
+
+  it('Basic OR with direct functions', async () => {
+
+    hrbac.addBoolFunc('is admin', () => req.user.role === 'admin');
+    hrbac.addBoolFunc('is user', () => req.user.role === 'user');
+    hrbac.addBoolFunc('is PUT', () => req.method === 'PUT');
+
+    hrbac.addBoolFunc('func', hrbac.or('is admin', hrbac.and('is user', hrbac.not('is PUT'))));
+
+    middleware = hrbac.middleware('func');
+
+    req = {
+      user: {
+        role: 'admin',
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'GET',
+    };
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.eql(null);
+    });
+
+    req = {
+      user: {
+        role: 'user',
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'GET',
+    };
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.eql(null);
+    });
+
+    req = {
+      user: {
+        role: 'user',
       },
       route: {
         path: '/admin/delete'
