@@ -21,6 +21,7 @@ request = {};
 response = {};
 
 describe('Role error throwing:', () => {
+  
   beforeEach(() => {
     hrbac = new HRBAC();
   });
