@@ -11,7 +11,8 @@
     "acl",
     "expressjs",
     "router",
-    "middleware"
+    "middleware",
+    "Access Control"
   ],
   "author": "Giulio Giovannini <giulio.inbox@gmail.com>",
   "license": "MIT",

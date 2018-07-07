@@ -1,17 +1,19 @@
+# expressive-hrbac
+Expressjs middleware builder to easily produce arbitrary Hierarchical Role-Based Access Control middleware with resource granularity.
+
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [expressive-hrbac](#expressive-hrbac)
 - [The problems it solves](#the-problems-it-solves)
-- [Installation](#installation)
 - [Phylosophy](#phylosophy)
-- [Usage](#usage)
-  - [Grant access to role](#grant-access-to-role)
+- [Installation](#installation)
+- [Usage examples](#usage-examples)
+  - [Grant access to role `admin`](#grant-access-to-role-admin)
   - [Associate function to a label for easy reference](#associate-function-to-a-label-for-easy-reference)
   - [Logically combine function](#logically-combine-function)
   - [Roles](#roles)
   - [Role inheritance](#role-inheritance)
+  - [Singleton](#singleton)
+  - [Named singleton](#named-singleton)
 - [Methods](#methods)
   - [addRole(role, parents = null)](#addrolerole-parents--null)
   - [addGetRoleFunc(func)](#addgetrolefuncfunc)
@@ -21,13 +23,8 @@
   - [not(func)](#notfunc)
   - [middleware(func)](#middlewarefunc)
   - [getInstance(label = null)](#getinstancelabel--null)
-- [Utilities](#utilities)
-  - [Generate README.md table of contents](#generate-readmemd-table-of-contents)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
-# expressive-hrbac
-Expressjs middleware builder to easily produce arbitrary Hierarchical Role-Based Access Control middleware with resource granularity.
 
 # The problems it solves
 * Provide access to a given resource only when the user has been awarded a certain role.
@@ -38,21 +35,24 @@ Expressjs middleware builder to easily produce arbitrary Hierarchical Role-Based
 
    Example: user can edit his own blog posts but not the posts from other users
 
-* Provide a way of combining logically any condition on roles or resouces access
+* Provide a way of combining logically any condition on roles or resouce access
 
    Example: a blog post can be edited by admin or by user when he is the blog owner.
 
 And much more...
 
-# Installation
-
 # Phylosophy
-**expressive-hrbac** is function-based. You provide synchounous or asynchrounous functions that take the request and response objects as input and return a true boolean when access must be granted or a false boolean when access must be denyed.
+**expressive-hrbac** is function-based. You provide synchounous or asynchrounous functions that take the request and response objects as input and return a true boolean when access must be granted or a false boolean when access must be denied.
 
 **expressive-hrbac** provide ways to build easy-to-reuse middleware from logical combinations of such functions.
 
-# Usage
-## Grant access to role
+# Installation
+```sh
+npm install expressive-hrbac --save
+```
+
+# Usage examples
+## Grant access to role `admin`
 First build a function that return true when user has role `admin`.
 ```js
 (req, res) => req.user.role ==== 'admin'
@@ -65,38 +65,68 @@ const router = require('express').Router();
 
 const hrbac = require('expressive-hrbac');
 
-router.put('/blogs/:blogId/posts/:postId', hrbac.middleware((req, res) => req.user.role === 'admin'), controller); 
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware((req, res) => req.user.role === 'admin'),
+  controller
+); 
 ```
 
 Maybe you prefer asynchronous functions:
 
 ```js
-router.put('/blogs/:blogId/posts/:postId', hrbac.middleware(async (req, res) => req.user.role === 'admin'), controller); 
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware(async (req, res) => req.user.role === 'admin'),
+  controller
+); 
 ```
 
 ## Associate function to a label for easy reference
-If you intend to use a function in more than one middleware you can avoid repeating it. You can associate it to a label using method `addBoolFunc()`.
+If you intend to use a function in more than one middleware you can avoid repeating its definition. You can associate it to a label using method `addBoolFunc()`.
 
 ```js
 hrbac.addBoolFunc('is admin', async (req, res) => req.user.role === 'admin'));
 
-router.put('/blogs/:blogId/posts/:postId', hrbac.middleware('is admin'), controller);
-router.put('/blogs/:blogId/comments/:commentId', hrbac.middleware('is admin'), controller); 
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('is admin'),
+  controller
+);
+
+router.put(
+  '/blogs/:blogId/comments/:commentId',
+  hrbac.middleware('is admin'),
+  controller
+); 
 ```
 
-**NOTE**: function `middleware()` can be passed an synchounous/asynchrounous function or a string label of an associated function. This is true for every method that accepts funcitons.
+**NOTE**: function `middleware()` can be passed a synchounous/asynchrounous function or a string label associated to a function. This is true for every method that accepts functions.
 
-## Logically combine function
-If you want to provide access to role `admin` or to role `user` only when `user` the owner of the blog post, you first create all the blocks you need and then combine everything in a single function using methods `and()`, `or()`, `not()`.
+## Logically combine functions
+If you want to grant access to role `admin` or to role `user` but only when `user` is the owner of the blog post, you first create all the functions you need and then combine everything in a single function using methods `and()`, `or()`, `not()`.
 
 ```js
 hrbac.addBoolFunc('is admin', (req, res) => req.user.role = 'admin'));
 hrbac.addBoolFunc('is user', (req, res) => req.user.role = 'user'));
 hrbac.addBoolFunc('is post owner', async (req, res) => await Posts.findById(req.params.postId).ownerId === req.user.id ));
 
-hrbac.addBoolFunc('is admin or post owner user', hrbac.or('is admin', hrbac.and('is user', 'is post owner')));
+hrbac.addBoolFunc(
+  'is admin or post owner user',
+  hrbac.or(
+    'is admin',
+    hrbac.and(
+      'is user',
+      'is post owner'
+    )
+  )
+);
 
-router.put('/blogs/:blogId/posts/:postId', hrbac.middleware('is admin or post owner user'), controller); 
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('is admin or post owner user'),
+  controller
+); 
 ```
 
 ## Roles
@@ -106,53 +136,89 @@ So far we have used roles improperly. You should not provide functions checking 
 hrbac.addRole('admin');
 ```
 
-By so doing expressive-hrbac will automatically create a function that checks for the `admin` role and associated it to label `admin`.
+By so doing **expressive-hrbac** will automatically create a function that checks for the `admin` role and associated it to label `admin`.
 
 ```js
 hrbac.addRole('admin');
 
-router.put('/blogs/:blogId/posts/:postId', hrbac.middleware('admin'), controller);
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('admin'),
+  controller
+);
 ```
 
-> **NOTE**: as soon as you define a role, you can NOT use the role string as a label for other functions.
+> **NOTE**: as soon as you define a role, you can NOT use the role string as a label for you custom functions.
 
-The role functions can be combined with other funcitons as any other function. For example here we provide access to admin or to any user with ID different from 10 (silly example!),.
+The role functions can be combined with other funcitons. For example here we provide access to admin or to any user with ID different from 10 (silly example!),.
 
 ```js
 hrbac.addRole('admin');
 
-router.put('/blogs/:blogId/posts/:postId', hrbac.middleware(hrbac.or('admin', hrbac.not((req, res) => req.user.userId == 10)), controller);
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware(
+    hrbac.or(
+      'admin',
+      hrbac.not((req, res) => req.user.userId == 10)
+    ),
+    controller
+  )
+);
 ```
 
-By deafult, expressive-hrbac will look into `red.user.role` for the user role. You can change that behaviour setting a function that returns the role from the request object.
+By deafult, **expressive-hrbac** will look into `req.user.role` for the user role. You can change that behaviour setting a function that returns the role from the request object.
 
 ```js
 hrbac.getRoleFunc((req, res) => req.user.myRole);
 
 hrbac.addRole('admin');
 
-router.put('/blogs/:blogId/posts/:postId', hrbac.middleware('admin'), controller);
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('admin'),
+  controller
+);
 ```
+
+The role defined in the request object can be an array of roles. Meaning that a user can have multiple roles and **expressive-hrbac** will check if any one of them can be granted access.
+
+```js
+// assume req.user.role = ['admin', 'blog_admin']
+
+hrbac.addRole('admin');
+
+// Middleware below will GRANT access as user has role `admin` in its list of roles
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('admin'),
+  controller
+);
+```
+
 ## Role inheritance
-A role can inherit access of another role. If access is not granted for the role, a second check will be attenped for each parent role, and for each parent role of each parent role and so on.
+A role can have parent roles, inheriting all access permissions from each parent role. If access is not granted for the role, a second check will be attenped for each parent role, and for each parent role of each parent role and so on.
 
 Inherited parents are declared as a second argument of the `addRole()` method.
 
 Suppose role `superadmin` should be able to access every resource that `admin` can access.
 
 ```js
+hrbac.addRole('admin');
 hrbac.addRole('superadmin', 'admin');
 ```
 > **NOTE**: a role must have been added before we can inherit from it
 
-In case `superadmin` should inherit from both `admin` and `blog_admin` acces you pass an array as the second parameter.
+In case `superadmin` should inherit from both `admin` and `blog_admin` you pass an array as the second parameter.
 
 ```js
+hrbac.addRole('admin');
+hrbac.addRole('blog_admin');
 hrbac.addRole('superadmin', ['admin', `blog_admin`]);
 ```
-Now when `superadmin` does not get access, expressive-hrbac will try again with role `admin` and in case of failure with role `blog_admin`.
+Now when `superadmin` does not get access, **expressive-hrbac** will try again with role `admin` and in case of failure with role `blog_admin`.
 
-If `blog_admin` further inherited from `user`, then if `superadmin` does not get access, expressive-hrbac will try again again with role `admin`, role `blog_admin` and role `user` traversing the inheritance tree.
+If `blog_admin` further inherited from `user`, then if `superadmin` does not get access, **expressive-hrbac** will try again with role `admin`, role `blog_admin` and role `user` traversing the inheritance tree.
 
 ```js
 hrbac.addRole('user');
@@ -160,10 +226,86 @@ hrbac.addRole('blog_admin','user');
 hrbac.addRole('admin');
 hrbac.addRole('superadmin', ['admin', 'blog_admin']);
 ```
+
+> **NOTE**: when the request object contains an array of roles, the inheritance will be activated for each role in the array.
+
+## Singleton
+So far we have worked with single instances of the HRBAC class. This might not be what you usually want. Maybe you want to centralize your Access Control. To do so you can use the `getInstance()` method to get a singleton so that you can easily access your Access Control from anywhere in your application.
+
+<span style="color:gray">file1.js</span>
+```js
+const HRBAC = require('expressive-hrbac');
+
+let hrbac = HRBAC.getInstance();
+
+hrbac.addRole('admin');
+```
+
+<span style="color:gray">file2.js</span>
+```js
+const hrbac = require('expressive-hrbac');
+
+let hrbac = HRBAC.getInstance();
+
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('admin'),
+  controller
+); 
+
+```
+
+## Named singleton
+In some cases you neither want a different instance each time you use your Access Control neither a unique singleton for the entire application. You might need to have to concentrate your Access Control in a few points of your application. In those cases you can use named singletons by simply passing a label to the `getInstance()` method. The first time you invoke the `getInstance()` method with a label, **expressive-hrbac** will create a new instance for you and return it for each subsequent invocations with the same label.
+
+<span style="color:gray">file1.js</span>
+```js
+const HRBAC = require('expressive-hrbac');
+
+let hrbac = HRBAC.getInstance('main');
+
+hrbac.addRole('admin');
+```
+
+<span style="color:gray">file2.js</span>
+```js
+const hrbac = require('expressive-hrbac');
+
+let hrbac = HRBAC.getInstance('main');
+
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('admin'),
+  controller
+); 
+```
+
+<span style="color:gray">file3.js</span>
+```js
+const HRBAC = require('expressive-hrbac');
+
+let hrbac = HRBAC.getInstance('content');
+
+hrbac.addRole('admin');
+```
+
+<span style="color:gray">file4.js</span>
+```js
+const hrbac = require('expressive-hrbac');
+
+let hrbac = HRBAC.getInstance('content');
+
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('admin'),
+  controller
+);
+```
+
 # Methods
 
 ## addRole(role, parents = null)
-Adds a role to the HRBAC instance
+Adds a role to the HRBAC instance. Also add a function associated to the role string.
 
 **Parameters**:
 -   `role`: [**string**] - The role string to be added
@@ -178,7 +320,7 @@ Adds a role to the HRBAC instance
 -   `EmptyParameterError`: When `role` is empty string.
 -   `NotAStringError`: when `role` is not a string.
 -   `RoleAlreadyExistsError`: If `role` already exists.
--   `LabelAlreadyInUseError`: If `role` has already been used as label.
+-   `LabelAlreadyInUseError`: If `role` has already been used as label for a function.
 -   `MissingRoleError`: If any parent role has not been added yet.
 
 ## addGetRoleFunc(func)
@@ -194,7 +336,7 @@ Adds a function to get the role from the request object
 -   `UndefinedParameterError`: When `func` is undefined.
 -   `NullParameterError`: When `func` is null.
 -   `NotAFunctionError`: when `func` is not a sync/async function.
--    `ParameterNumberMismatchError`: when `func` does not take exactly 2 arguments.
+-   `ParameterNumberMismatchError`: when `func` does not take exactly 2 arguments.
 
 
 ## addBoolFunc(label, func)
@@ -202,7 +344,7 @@ Adds a boolean function and associates it to the provided label
 
 **Parameters**:
 -   `label`: [**string**] - The label to associate the function to
--   `func`: [**sync/async function**] - Function to be called
+-   `func`: [**sync/async function**] - Function returning boolean.
 
 **Returns**:
 -   [**HRBAC**] current HRBAC instance.
@@ -214,10 +356,10 @@ Adds a boolean function and associates it to the provided label
 -   `NotAStringError`: when `label` is not a string.
 -   `NotAFunctionError`: when `func` is not a sync/async function.
 -   `LabelAlreadyInUseError`: If `label` has already been used as label.
--    `ParameterNumberMismatchError`: when `func` does not take exactly 2 arguments.
+-   `ParameterNumberMismatchError`: when `func` does not take exactly 2 arguments.
 
 ## or(func1, func2)
-Combines two function with boolean OR
+Combines two function with boolean OR.
 
 **Parameters**:
 -   `func1`: [**string | sync/async function**] - Label or actual function
@@ -230,12 +372,12 @@ Combines two function with boolean OR
 -   `UndefinedParameterError`: When `func1` or `func2` is undefined.
 -   `NullParameterError`: When `func1` or `func2` is null.
 -   `EmptyParameterError`: When `func1` or `func2` is a string which is empty.
--   `MissingFunctionError`: If `func1` or `func2` is a string but it is not associated to a function
--   `NotAFunctionError`: when `func1` or `func2` is not a string and it is not a sync/async function.
--    `ParameterNumberMismatchError`: when `func1` or `func2` is not a string and it is not a function which takes exactly 2 arguments.
+-   `MissingFunctionError`: When `func1` or `func2` is a string but it is not associated to a function
+-   `NotAFunctionError`: When `func1` or `func2` is not a string and it is not a sync/async function.
+-   `ParameterNumberMismatchError`: when `func1` or `func2` is not a string and it is not a function which takes exactly 2 arguments.
 
 ## and(func1, func2)
-Combines two function with boolean AND
+Combines two function with boolean AND.
 
 **Parameters**:
 -   `func1`: [**string | sync/async function**] - Label or actual function
@@ -248,9 +390,9 @@ Combines two function with boolean AND
 -   `UndefinedParameterError`: When `func1` or `func2` is undefined.
 -   `NullParameterError`: When `func1` or `func2` is null.
 -   `EmptyParameterError`: When `func1` or `func2` is a string which is empty.
--   `MissingFunctionError`: If `func1` or `func2` is a string but it is not associated to a function
+-   `MissingFunctionError`: If `func1` or `func2` is a string but it is not associated to a function.
 -   `NotAFunctionError`: when `func1` or `func2` is not a string and it is not a sync/async function.
--    `ParameterNumberMismatchError`: when `func1` or `func2` is not a string and it is not a function which takes exactly 2 arguments.
+-   `ParameterNumberMismatchError`: when `func1` or `func2` is not a string and it is not a function which takes exactly 2 arguments.
 
 ## not(func)
 Returnes negated function
@@ -267,10 +409,10 @@ Returnes negated function
 -   `EmptyParameterError`: When `func` is a string which is empty.
 -   `MissingFunctionError`: If `func` is a string but it is not associated to a function
 -   `NotAFunctionError`: when `func` is not a string and it is not a sync/async function.
--    `ParameterNumberMismatchError`: when `func` is not a string and it is not a function which takes exactly 2 arguments.
+-   `ParameterNumberMismatchError`: when `func` is not a string and it is not a function which takes exactly 2 arguments.
 
 ## middleware(func)
-Returnes middleware function.
+Returns middleware function.
 
 **Parameters**:
 -   `func`: [**string | sync/async function**] - Function label or actual function
@@ -284,16 +426,16 @@ Returnes middleware function.
 -   `EmptyParameterError`: When `func` is a string which is empty.
 -   `MissingFunctionError`: If `func` is a string but it is not associated to a function
 -   `NotAFunctionError`: when `func` is not a string and it is not a sync/async function.
--    `ParameterNumberMismatchError`: when `func` is not a string and it is not a function which takes exactly 2 arguments.
+-   `ParameterNumberMismatchError`: when `func` is not a string and it is not a function which takes exactly 2 arguments.
 
 ## getInstance(label = null)
-Retruns, and create if necessary, an HRBAC instance associated to `label`. If `label` is not provided will return, and create if necessary, an HRBAC instance associated to the empty string.
+Returns, and create if necessary, an HRBAC instance associated to `label`. If `label` is not provided will return an application-wide singleton.
 
 **Parameters**:
--   `label`: (_optional_) [**string**] - label to associate the instance to. If not provided will associate instance to empty string.
+-   `label`: (_optional_) [**string**] - label to associate the instance to. If not provided will return an application-wide singleton.
 
 **Returns**:
--   [**HRBAC**] HRBAC instance associated to `label` is provided or the empty string.
+-   [**HRBAC**] HRBAC instance associated to `label` if provided or  an application-wide singleton.
 
 **Throws**:
 -   `NullParameterError`: When `role` is null.
@@ -303,11 +445,3 @@ Retruns, and create if necessary, an HRBAC instance associated to `label`. If `l
 -   `LabelAlreadyInUseError`: If `role` has already been used as label.
 -   `MissingRoleError`: If any parent role has not been added yet.
 
-# Utilities
-## Generate README.md table of contents
-
-Install doctoc from npm the add ToC to markdown file.
-
-```bash
-doctoc README.md
-```

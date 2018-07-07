@@ -1,4 +1,0 @@
-- Add function that takes router and json config and returns the router with all pre and
-  post middleware added, with the hrbac added and with the controller added
-- Add options in case of deny: generate error for next or respond
-- Add default role in case req has none
