@@ -6,6 +6,10 @@
   "scripts": {
     "test": "./node_modules/mocha/bin/_mocha"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/supergiulio2000/expressive-hrbac.git"
+  },
   "keywords": [
     "hrbac",
     "acl",

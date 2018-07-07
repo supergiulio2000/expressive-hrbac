@@ -82,8 +82,8 @@ router.put(
 ); 
 ```
 
-## Associate function to a label for easy reference
-If you intend to use a function more than one route you can avoid repeating its definition. You can associate it to a label using method `addBoolFunc()`.
+## Associate functions to labels for easy reference
+If you intend to use a function for more than one route you can avoid repeating its definition. You can associate it to a label using method `addBoolFunc()`.
 
 ```js
 hrbac.addBoolFunc('is admin', async (req, res) => req.user.role === 'admin'));
