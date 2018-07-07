@@ -53,7 +53,7 @@ npm install expressive-hrbac --save
 
 # Usage examples
 ## Grant access to role `admin`
-First build a function that return true when user has role `admin`.
+First build a function that return true when the user has role `admin`.
 ```js
 (req, res) => req.user.role ==== 'admin'
 ```
@@ -83,7 +83,7 @@ router.put(
 ```
 
 ## Associate function to a label for easy reference
-If you intend to use a function in more than one middleware you can avoid repeating its definition. You can associate it to a label using method `addBoolFunc()`.
+If you intend to use a function more than one route you can avoid repeating its definition. You can associate it to a label using method `addBoolFunc()`.
 
 ```js
 hrbac.addBoolFunc('is admin', async (req, res) => req.user.role === 'admin'));
@@ -104,7 +104,7 @@ router.put(
 **NOTE**: function `middleware()` can be passed a synchounous/asynchrounous function or a string label associated to a function. This is true for every method that accepts functions.
 
 ## Logically combine functions
-If you want to grant access to role `admin` or to role `user` but only when `user` is the owner of the blog post, you first create all the functions you need and then combine everything in a single function using methods `and()`, `or()`, `not()`.
+Suppose you want to grant access to role `admin` or to role `user` but only when `user` is the owner of the blog post, you first create all the functions you need and then combine everything in a single function using methods `and()`, `or()`, `not()`.
 
 ```js
 hrbac.addBoolFunc('is admin', (req, res) => req.user.role = 'admin'));
@@ -136,7 +136,7 @@ So far we have used roles improperly. You should not provide functions checking 
 hrbac.addRole('admin');
 ```
 
-By so doing **expressive-hrbac** will automatically create a function that checks for the `admin` role and associated it to label `admin`.
+By so doing **expressive-hrbac** will automatically add a boolean function that checks for the `admin` role and associated it to label `admin`.
 
 ```js
 hrbac.addRole('admin');
@@ -150,7 +150,7 @@ router.put(
 
 > **NOTE**: as soon as you define a role, you can NOT use the role string as a label for you custom functions.
 
-The role functions can be combined with other funcitons. For example here we provide access to admin or to any user with ID different from 10 (silly example!),.
+The role functions can be combined with other funcitons. You simply reference to it with the role string itself. For example here we provide access to `admin` or to any user with ID different from 10 (silly example!),.
 
 ```js
 hrbac.addRole('admin');
@@ -167,10 +167,10 @@ router.put(
 );
 ```
 
-By deafult, **expressive-hrbac** will look into `req.user.role` for the user role. You can change that behaviour setting a function that returns the role from the request object.
+By deafult, **expressive-hrbac** will look into `req.user.role` for the user role. You can change that behaviour providing a function that returns the role from the request object with method `addGetRoleFunc()`.
 
 ```js
-hrbac.getRoleFunc((req, res) => req.user.myRole);
+hrbac.addGetRoleFunc((req, res) => req.user.myRole);
 
 hrbac.addRole('admin');
 
@@ -216,7 +216,7 @@ hrbac.addRole('admin');
 hrbac.addRole('blog_admin');
 hrbac.addRole('superadmin', ['admin', `blog_admin`]);
 ```
-Now when `superadmin` does not get access, **expressive-hrbac** will try again with role `admin` and in case of failure with role `blog_admin`.
+Now if `superadmin` does not get access, **expressive-hrbac** will try again with role `admin` and in case of failure with role `blog_admin`.
 
 If `blog_admin` further inherited from `user`, then if `superadmin` does not get access, **expressive-hrbac** will try again with role `admin`, role `blog_admin` and role `user` traversing the inheritance tree.
 
@@ -256,7 +256,7 @@ router.put(
 ```
 
 ## Named singleton
-In some cases you neither want a different instance each time you use your Access Control neither a unique singleton for the entire application. You might need to have to concentrate your Access Control in a few points of your application. In those cases you can use named singletons by simply passing a label to the `getInstance()` method. The first time you invoke the `getInstance()` method with a label, **expressive-hrbac** will create a new instance for you and return it for each subsequent invocations with the same label.
+In some cases you neither want a different instance each time you use your Access Control neither a unique singleton for the entire application. You might need to have to concentrate your Access Control in a few points of your application. In those cases you can use named singletons by simply passing a label to the `getInstance()` method. The first time you invoke the `getInstance()` method with a label, **expressive-hrbac** will create a new instance for you and then it will return it for each subsequent invocations with the same label.
 
 <span style="color:gray">file1.js</span>
 ```js
