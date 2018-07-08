@@ -492,3 +492,32 @@ Returns, and create if necessary, an HRBAC instance associated to `label`. If `l
 -   `LabelAlreadyInUseError`: If `role` has already been used as label.
 -   `MissingRoleError`: If any parent role has not been added yet.
 
+## addUnauthorizedErrorFunc(func)
+Adds a function to handle access denials.
+
+**Parameters**:
+-   `func`: [**sync/async function**] - Function to be called
+
+**Returns**:
+-   [**HRBAC**] current HRBAC instance.
+
+**Throws**:
+-   `UndefinedParameterError`: When `func` is undefined.
+-   `NullParameterError`: When `func` is null.
+-   `NotAFunctionError`: when `func` is not a sync/async function.
+-   `ParameterNumberMismatchError`: when `func` does not take exactly 3 arguments.
+
+## addCustomFunctionErrorFunc(func)
+Adds a function to handle errors with the boolean functions provided.
+
+**Parameters**:
+-   `func`: [**sync/async function**] - Function to be called
+
+**Returns**:
+-   [**HRBAC**] current HRBAC instance.
+
+**Throws**:
+-   `UndefinedParameterError`: When `func` is undefined.
+-   `NullParameterError`: When `func` is null.
+-   `NotAFunctionError`: when `func` is not a sync/async function.
+-   `ParameterNumberMismatchError`: when `func` does not take exactly 4 arguments.
