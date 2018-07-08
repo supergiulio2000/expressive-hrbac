@@ -302,6 +302,11 @@ router.put(
 );
 ```
 
+# Errors
+In case of denied access **expressive-hrbac** will call `next()` with a `401 Unauthorized` HTTP error.
+
+In case of errors in the custom functions added using method `addBoolFunc()` **expressive-hrbac** will call `next()` with a `500 Internal Server Error` HTTP error.
+
 # Methods
 
 ## addRole(role, parents = null)
