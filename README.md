@@ -24,6 +24,8 @@ Expressjs middleware builder to easily produce arbitrary Hierarchical Role-Based
   - [not(func)](#notfunc)
   - [middleware(func)](#middlewarefunc)
   - [getInstance(label = null)](#getinstancelabel--null)
+  - [addUnauthorizedErrorFunc(func)](#addunauthorizederrorfuncfunc)
+  - [addCustomFunctionErrorFunc(func)](#addcustomfunctionerrorfuncfunc)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
