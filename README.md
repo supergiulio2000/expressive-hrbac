@@ -129,6 +129,27 @@ router.put(
 ); 
 ```
 
+To build a middleware you don't have to always build your functions beforehand. If you don't intend to re-use a function, you can pass it directly to the `middleware()` method while mixing it with already-associated functions.
+
+```js
+hrbac.addBoolFunc('is admin', (req, res) => req.user.role = 'admin');
+hrbac.addBoolFunc('is user', (req, res) => req.user.role = 'user');
+
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware(
+    hrbac.or(
+      'is admin',
+      hrbac.and(
+        'is user',
+        async (req, res) => await Posts.findById(req.params.postId).ownerId === req.user.id
+      )
+    )
+  ),
+  controller
+);
+```
+
 ## Roles
 So far we have used roles improperly. You should not provide functions checking for roles but use the `addRole()` method instead.
 
