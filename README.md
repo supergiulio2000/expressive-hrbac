@@ -13,7 +13,8 @@ Expressjs middleware builder to easily produce arbitrary Hierarchical Role-Based
   - [Roles](#roles)
   - [Role inheritance](#role-inheritance)
   - [Singleton](#singleton)
-  - [Named singleton](#named-singleton)
+  - [Named singletons](#named-singletons)
+- [Errors](#errors)
 - [Methods](#methods)
   - [addRole(role, parents = null)](#addrolerole-parents--null)
   - [addGetRoleFunc(func)](#addgetrolefuncfunc)
@@ -276,7 +277,7 @@ router.put(
 
 ```
 
-## Named singleton
+## Named singletons
 In some cases you neither want a different instance each time you use your Access Control neither a unique singleton for the entire application. You might need to have to concentrate your Access Control in a few points of your application. In those cases you can use named singletons by simply passing a label to the `getInstance()` method. The first time you invoke the `getInstance()` method with a label, **expressive-hrbac** will create a new instance for you and then it will return it for each subsequent invocations with the same label.
 
 <span style="color:gray">file1.js</span>
@@ -324,10 +325,30 @@ router.put(
 ```
 
 # Errors
-In case of denied access **expressive-hrbac** will call `next()` with a `401 Unauthorized` HTTP error.
+In case of denied access **expressive-hrbac** will call `next()` passing an instance of class `Error` set to HTTP error `401 Unauthorized`. You can change such behaviour providing a function to handle access denials using method `addUnauthorizedErrorFunc()`. In the example below we return HTTP `403 Forbidden` except for user with id 10 which will get a `400 Bad Request`.
 
-In case of errors in the custom functions added using method `addBoolFunc()` **expressive-hrbac** will call `next()` with a `500 Internal Server Error` HTTP error.
+```js
+hrbac.addUnauthorizedErrorFunc((req, res, next) => {
+  let err = new Error();
+  if (req.user.id === 10) {
+    err.message = 'Bad Request';
+    err.status = 400;
+  } else {
+    err = 'Forbidden';
+    err.status = 403;
+  }
+  next(err);
+})
+```
+In case of errors in the custom functions added using method `addBoolFunc()` **expressive-hrbac** will call `next()` passing an instance of class `Error` set to HTTP error `500 Internal Server Error (<original error message>)` where `<original error message>` will be set to the message of the thrown internal message. You can change such behaviour providing a function to handle error in custom functions using method `addCustomFunctionErrorFunc()`. The first argument passed to `addCustomFunctionErrorFunc()` is the error thrown by the server due to the error in the custom function. In the example below we return HTTP `500 This is very bad! This is what happened: <original error message>`.
 
+```js
+hrbac.addCustomFunctionErrorFunc((err, req, res, next) => {
+  err.message = 'This is very bad! This is what happened: ' + err.message;
+  err.status = 500;
+  next(err);
+});
+```
 # Methods
 
 ## addRole(role, parents = null)

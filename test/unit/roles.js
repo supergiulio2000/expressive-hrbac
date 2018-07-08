@@ -14,6 +14,7 @@ const RoleAlreadyExistsError   = require('../../lib/errors/RoleAlreadyExistsErro
 const MissingRoleError         = require('../../lib/errors/MissingRoleError');
 const UndefinedParameterError  = require('../../lib/errors/UndefinedParameterError');
 const NotAStringError          = require('../../lib/errors/NotAStringError');
+const NotAFunctionError             = require('../../lib/errors/NotAFunctionError');
 const ParameterNumberMismatchError  = require('../../lib/errors/ParameterNumberMismatchError');
 
 let hrbac;
@@ -191,6 +192,21 @@ describe('addGetRoleFunc', () => {
     afterEach(() => {
     });
 
+    it('Undef first argument throws error', async () => {
+
+      expect(hrbac.addGetRoleFunc.bind(hrbac)).to.throw(UndefinedParameterError);
+    });
+  
+    it('Null first argument throws error', async () => {
+  
+      expect(hrbac.addGetRoleFunc.bind(hrbac, null)).to.throw(NullParameterError);
+    });
+  
+    it('First argument must be a function', async () => {
+  
+      expect(hrbac.addGetRoleFunc.bind(hrbac, 5)).to.throw(NotAFunctionError);
+    });
+
     it('Function takes 2 arguments', async () => {
 
       expect(hrbac.addGetRoleFunc.bind(hrbac, () => 5)).to.throw(ParameterNumberMismatchError);
@@ -314,6 +330,21 @@ describe('addGetRoleFunc', () => {
     });
 
     afterEach(() => {
+    });
+
+    it('Undef first argument throws error', async () => {
+
+      expect(hrbac.addGetRoleFunc.bind(hrbac)).to.throw(UndefinedParameterError);
+    });
+  
+    it('Null first argument throws error', async () => {
+  
+      expect(hrbac.addGetRoleFunc.bind(hrbac, null)).to.throw(NullParameterError);
+    });
+  
+    it('First argument must be a function', async () => {
+  
+      expect(hrbac.addGetRoleFunc.bind(hrbac, 5)).to.throw(NotAFunctionError);
     });
 
     it('Function takes 2 arguments', async () => {
