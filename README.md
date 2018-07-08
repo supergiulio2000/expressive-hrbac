@@ -334,7 +334,7 @@ hrbac.addUnauthorizedErrorFunc((req, res, next) => {
     err.message = 'Bad Request';
     err.status = 400;
   } else {
-    err = 'Forbidden';
+    err.message = 'Forbidden';
     err.status = 403;
   }
   next(err);
