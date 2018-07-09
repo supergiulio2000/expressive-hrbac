@@ -1,6 +1,6 @@
 {
   "name": "expressive-hrbac",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Hierarchical Role-Based Access Control middleware for expressjs",
   "main": "lib/hrbac.js",
   "scripts": {
