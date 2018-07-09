@@ -269,7 +269,7 @@ hrbac.addRole('admin');
 
 <span style="color:gray">file2.js</span>
 ```js
-const hrbac = require('expressive-hrbac');
+const HRBAC = require('expressive-hrbac');
 
 let hrbac = HRBAC.getInstance();
 
@@ -295,7 +295,7 @@ hrbac.addRole('admin');
 
 <span style="color:gray">file2.js</span>
 ```js
-const hrbac = require('expressive-hrbac');
+const HRBAC = require('expressive-hrbac');
 
 let hrbac = HRBAC.getInstance('main');
 
@@ -317,7 +317,7 @@ hrbac.addRole('admin');
 
 <span style="color:gray">file4.js</span>
 ```js
-const hrbac = require('expressive-hrbac');
+const HRBAC = require('expressive-hrbac');
 
 let hrbac = HRBAC.getInstance('content');
 
