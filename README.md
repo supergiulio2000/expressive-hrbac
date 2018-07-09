@@ -66,7 +66,9 @@ A middleware can be created from such function using method `middleware()`.
 ```js
 const router = require('express').Router();
 
-const hrbac = require('expressive-hrbac');
+const HRBAC = require('expressive-hrbac');
+
+let hrbac = new HRBAC();
 
 router.put(
   '/blogs/:blogId/posts/:postId',
