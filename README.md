@@ -137,8 +137,8 @@ router.put(
 To build a middleware you don't have to always build your functions beforehand. If you don't intend to re-use a function, you can pass it directly to the `middleware()` method while mixing it with already-associated functions.
 
 ```js
-hrbac.addBoolFunc('is admin', (req, res) => req.user.role = 'admin');
-hrbac.addBoolFunc('is user', (req, res) => req.user.role = 'user');
+hrbac.addBoolFunc('is admin', (req, res) => req.user.role === 'admin');
+hrbac.addBoolFunc('is user', (req, res) => req.user.role === 'user');
 
 router.put(
   '/blogs/:blogId/posts/:postId',
@@ -186,7 +186,7 @@ router.put(
   hrbac.middleware(
     hrbac.or(
       'admin',
-      hrbac.not((req, res) => req.user.userId == 10)
+      hrbac.not((req, res) => req.user.userId === 10)
     ),
     controller
   )
@@ -489,12 +489,8 @@ Returns, and create if necessary, an HRBAC instance associated to `label`. If `l
 -   [**HRBAC**] HRBAC instance associated to `label` if provided or  an application-wide singleton.
 
 **Throws**:
--   `NullParameterError`: When `role` is null.
--   `EmptyParameterError`: When `role` is empty string.
--   `NotAStringError`: when `role` is not a string.
--   `RoleAlreadyExistsError`: If `role` already exists.
--   `LabelAlreadyInUseError`: If `role` has already been used as label.
--   `MissingRoleError`: If any parent role has not been added yet.
+-   `EmptyParameterError`: When `label` is empty string.
+-   `NotAStringError`: when `label` is not a string.
 
 ## addUnauthorizedErrorFunc(func)
 Adds a function to handle access denials.

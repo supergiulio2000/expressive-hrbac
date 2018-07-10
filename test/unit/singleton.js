@@ -5,6 +5,9 @@ const should = chai.should();
 var assert = require('assert');
 var expect = chai.expect;
 
+
+const EmptyParameterError      = require('../../lib/errors/EmptyParameterError');
+const NotAStringError               = require('../../lib/errors/NotAStringError');
 const RoleAlreadyExistsError   = require('../../lib/errors/RoleAlreadyExistsError');
 
 const HRBAC = require('../../lib/hrbac');
@@ -15,6 +18,16 @@ request = {};
 response = {};
 
 describe('Singleton', () => {
+
+  it('getInstance() throws error if label is an emmty string', async () => {
+
+    expect(HRBAC.getInstance.bind(HRBAC, '')).to.throw(EmptyParameterError);
+  });
+
+  it('getInstance() throws error if label is provided but is not a valid string', async () => {
+
+    expect(HRBAC.getInstance.bind(HRBAC, 5)).to.throw(NotAStringError);
+  });
 
   it('Throws RoleAlreadyEsists when you get instance twice and create same role', async () => {
 
