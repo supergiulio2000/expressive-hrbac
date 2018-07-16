@@ -7,13 +7,13 @@ var expect = chai.expect;
 
 const HRBAC = require('../../lib/hrbac');
 
-const NullParameterError       = require('../../lib/errors/NullParameterError');
-const EmptyParameterError      = require('../../lib/errors/EmptyParameterError');
-const LabelAlreadyInUseError   = require('../../lib/errors/LabelAlreadyInUseError');
-const RoleAlreadyExistsError   = require('../../lib/errors/RoleAlreadyExistsError');
-const MissingRoleError         = require('../../lib/errors/MissingRoleError');
-const UndefinedParameterError  = require('../../lib/errors/UndefinedParameterError');
-const NotAStringError          = require('../../lib/errors/NotAStringError');
+const NullParameterError            = require('../../lib/errors/NullParameterError');
+const EmptyParameterError           = require('../../lib/errors/EmptyParameterError');
+const LabelAlreadyInUseError        = require('../../lib/errors/LabelAlreadyInUseError');
+const RoleAlreadyExistsError        = require('../../lib/errors/RoleAlreadyExistsError');
+const MissingRoleError              = require('../../lib/errors/MissingRoleError');
+const UndefinedParameterError       = require('../../lib/errors/UndefinedParameterError');
+const NotAStringError               = require('../../lib/errors/NotAStringError');
 const NotAFunctionError             = require('../../lib/errors/NotAFunctionError');
 const ParameterNumberMismatchError  = require('../../lib/errors/ParameterNumberMismatchError');
 
@@ -60,6 +60,144 @@ describe('Role error throwing:', () => {
     hrbac.addBoolFunc('test_func1', (req, res) => 5);
 
     expect(hrbac.addRole.bind(hrbac, 'test_func1')).to.throw(LabelAlreadyInUseError);
+  });
+});
+
+describe('Should DENY if role is not valid in request object', () => {
+
+  beforeEach(() => {
+    hrbac = new HRBAC();
+  });
+
+  afterEach(() => {
+  });
+
+  it('Error while getting role from request object casue denial', async () => {
+
+    req = {
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    hrbac.addRole('admin');
+
+    middleware = hrbac.middleware('admin');
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+      expect(err.message).to.eql('Unauthorized');
+    });
+  });
+
+  it('Role undefined in request object cause denial', async () => {
+
+    req = {
+      user: {},
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    hrbac.addRole('admin');
+
+    middleware = hrbac.middleware('admin');
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+      expect(err.message).to.eql('Unauthorized');
+    });
+  });
+
+  it('Role null in request object cause denial', async () => {
+
+    req = {
+      user: {
+        role: null
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    hrbac.addRole('admin');
+
+    middleware = hrbac.middleware('admin');
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+      expect(err.message).to.eql('Unauthorized');
+    });
+  });
+
+  it('Role not a string in request object cause denial', async () => {
+
+    req = {
+      user: {
+        role: 5
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    hrbac.addRole('admin');
+
+    middleware = hrbac.middleware('admin');
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+      expect(err.message).to.eql('Unauthorized');
+    });
+  });
+
+
+  it('Role is a empty a string in request object cause denial', async () => {
+
+    req = {
+      user: {
+        role: ''
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    hrbac.addRole('admin');
+
+    middleware = hrbac.middleware('admin');
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+      expect(err.message).to.eql('Unauthorized');
+    });
+  });
+
+  it('Role is an array but not and array of strings a string in request object cause denial', async () => {
+
+    req = {
+      user: {
+        role: ['admin', 'user', {}]
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    hrbac.addRole('admin');
+
+    middleware = hrbac.middleware('admin');
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+      expect(err.message).to.eql('Unauthorized');
+    });
   });
 });
 

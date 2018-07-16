@@ -222,6 +222,9 @@ router.put(
 );
 ```
 
+## The role in the request object
+By way of the the function provided with method `addGetRoleFunc()` or setting the request property `req.user.role` a valid role must be provided to the **expressive-hrbac** middleware. A valid role consists in a string representing the user role or an array of strings representing the user roles. In case no valid role is provided **expressive-hrbac** will call `next()` passing an instance of class `Error` set to HTTP error `401 Unauthorized` (see section [Errors](#errors) below).
+
 ## Role inheritance
 A role can have parent roles, inheriting all access permissions from each parent role. If access is not granted for the role, a second check will be attenped for each parent role, and for each parent role of each parent role and so on.
 
