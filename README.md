@@ -11,9 +11,10 @@ Expressjs middleware builder to easily produce arbitrary Hierarchical Role-Based
   - [Associate functions to labels for easy reference](#associate-functions-to-labels-for-easy-reference)
   - [Logically combine functions](#logically-combine-functions)
   - [Roles](#roles)
-  - [Role inheritance](#role-inheritance)
+    - [The role in the request object](#the-role-in-the-request-object)
+    - [Role inheritance](#role-inheritance)
   - [Singleton](#singleton)
-  - [Named singletons](#named-singletons)
+    - [Named singletons](#named-singletons)
 - [Errors](#errors)
 - [Methods](#methods)
   - [addRole(role, parents = null)](#addrolerole-parents--null)
@@ -222,10 +223,10 @@ router.put(
 );
 ```
 
-## The role in the request object
+### The role in the request object
 By way of the the function provided with method `addGetRoleFunc()` or setting the request property `req.user.role` a valid role must be provided to the **expressive-hrbac** middleware. A valid role consists in a string representing the user role or an array of strings representing the user roles. In case no valid role is provided **expressive-hrbac** will call `next()` passing an instance of class `Error` set to HTTP error `401 Unauthorized` (see section [Errors](#errors) below).
 
-## Role inheritance
+### Role inheritance
 A role can have parent roles, inheriting all access permissions from each parent role. If access is not granted for the role, a second check will be attenped for each parent role, and for each parent role of each parent role and so on.
 
 Inherited parents are declared as a second argument of the `addRole()` method.
@@ -284,7 +285,7 @@ router.put(
 
 ```
 
-## Named singletons
+### Named singletons
 In some cases you neither want a different instance each time you use your Access Control neither a unique singleton for the entire application. You might need to have to concentrate your Access Control in a few points of your application. In those cases you can use named singletons by simply passing a label to the `getInstance()` method. The first time you invoke the `getInstance()` method with a label, **expressive-hrbac** will create a new instance for you and then it will return it for each subsequent invocations with the same label.
 
 <span style="color:gray">file1.js</span>
