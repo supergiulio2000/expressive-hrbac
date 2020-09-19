@@ -4,7 +4,8 @@
   "description": "Hierarchical Role-Based Access Control middleware for expressjs",
   "main": "lib/hrbac.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/_mocha"
+    "test": "./node_modules/mocha/bin/_mocha",
+    "windows_test": "node node_modules\\mocha\\bin\\_mocha"
   },
   "repository": {
     "type": "git",
