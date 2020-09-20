@@ -731,7 +731,7 @@ describe('Role with array of parents', () => {
   });
 });
 
-describe('idDescendantOf()', () => {
+describe('isDescendant()', () => {
 
   beforeEach(() => {
     hrbac = new HRBAC();
@@ -742,35 +742,35 @@ describe('idDescendantOf()', () => {
 
   describe('Errors', () => {
     it('Descendant undefined', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac)).to.throw(UndefinedParameterError);
+      expect(hrbac.isDescendant.bind(hrbac)).to.throw(UndefinedParameterError);
     });
     it('Parent undefined', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac, 'admin')).to.throw(UndefinedParameterError);
+      expect(hrbac.isDescendant.bind(hrbac, 'admin')).to.throw(UndefinedParameterError);
     });
     it('Descendant null', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac, null, 'superadmin')).to.throw(NullParameterError);
+      expect(hrbac.isDescendant.bind(hrbac, null, 'superadmin')).to.throw(NullParameterError);
     });
     it('Parent null', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac, 'admin', null)).to.throw(NullParameterError);
+      expect(hrbac.isDescendant.bind(hrbac, 'admin', null)).to.throw(NullParameterError);
     });
     it('Descendant empty string', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac, '', 'superadmin')).to.throw(EmptyParameterError);
+      expect(hrbac.isDescendant.bind(hrbac, '', 'superadmin')).to.throw(EmptyParameterError);
     });
     it('Parent empty string', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac, 'admin', '')).to.throw(EmptyParameterError);
+      expect(hrbac.isDescendant.bind(hrbac, 'admin', '')).to.throw(EmptyParameterError);
     });
     it('Descendant not a string', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac, 5, 'superadmin')).to.throw(NotAStringError);
+      expect(hrbac.isDescendant.bind(hrbac, 5, 'superadmin')).to.throw(NotAStringError);
     });
     it('Parent not a string', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac, 'admin', 5)).to.throw(NotAStringError);
+      expect(hrbac.isDescendant.bind(hrbac, 'admin', 5)).to.throw(NotAStringError);
     });
     it('Descendant role non-existant', async () => {
-      expect(hrbac.idDescendantOf.bind(hrbac, 'non-existant', 'non-existant2')).to.throw(MissingRoleError);
+      expect(hrbac.isDescendant.bind(hrbac, 'non-existant', 'non-existant2')).to.throw(MissingRoleError);
     });
     it('Parent role non-existant', async () => {
       hrbac.addRole('admin');
-      expect(hrbac.idDescendantOf.bind(hrbac, 'admin', 'non-existant2')).to.throw(MissingRoleError);
+      expect(hrbac.isDescendant.bind(hrbac, 'admin', 'non-existant2')).to.throw(MissingRoleError);
     });
   });
 
@@ -778,21 +778,28 @@ describe('idDescendantOf()', () => {
     it('Descendant is direct children of ancestor', async () => {
       hrbac.addRole('admin');
       hrbac.addRole('superadmin', 'admin');
-      expect(hrbac.idDescendantOf('superadmin', 'admin')).to.eql(true);
+      expect(hrbac.isDescendant('superadmin', 'admin')).to.eql(true);
     });
 
     it('Descendant is nethew of ancestor', async () => {
       hrbac.addRole('user')
       hrbac.addRole('admin', 'user');
       hrbac.addRole('superadmin', 'admin');
-      expect(hrbac.idDescendantOf('superadmin', 'user')).to.eql(true);
+      expect(hrbac.isDescendant('superadmin', 'user')).to.eql(true);
     });
 
     it('Descendant is not related to ancestor', async () => {
       hrbac.addRole('user')
       hrbac.addRole('admin', 'user');
       hrbac.addRole('superadmin');
-      expect(hrbac.idDescendantOf('superadmin', 'user')).to.eql(false);
+      expect(hrbac.isDescendant('superadmin', 'user')).to.eql(false);
+    });
+
+    it('A role is not a descendamt of itself', async () => {
+      hrbac.addRole('user')
+      hrbac.addRole('admin', 'user');
+      hrbac.addRole('superadmin', 'admin');
+      expect(hrbac.isDescendant('admin', 'admin')).to.eql(false);
     });
   });
 });

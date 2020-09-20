@@ -1,5 +1,5 @@
 # expressive-hrbac
-Expressjs middleware builder to easily produce arbitrary Hierarchical Role-Based Access Control middleware with resource granularity.
+Expressjs middleware builder to easily create arbitrary Hierarchical Role-Based Access Control middleware with resource granularity.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
@@ -19,6 +19,7 @@ Expressjs middleware builder to easily produce arbitrary Hierarchical Role-Based
 - [Methods](#methods)
   - [addRole(role, parents = null)](#addrolerole-parents--null)
   - [addGetRoleFunc(func)](#addgetrolefuncfunc)
+  - [isDescendant(descendant, ancestor)](#isdescendantdescendant-ancestor)
   - [addBoolFunc(label, func)](#addboolfunclabel-func)
   - [or(func1, func2)](#orfunc1-func2)
   - [and(func1, func2)](#andfunc1-func2)
@@ -77,13 +78,14 @@ router.put(
   controller
 ); 
 ```
+Now, endpoint `/blogs/:blogId/posts/:postId` will return HTTP STatus `401` if property `req.user.role` is not set to `admin`.
 
 Maybe you prefer asynchronous functions:
 
 ```js
 router.put(
   '/blogs/:blogId/posts/:postId',
-  hrbac.middleware(async (req, res) => req.user.role === 'admin'),
+  hrbac.middleware(async (req, res) => await getUserRole(req.user.id) === 'admin'),
   controller
 ); 
 ```
@@ -135,7 +137,7 @@ router.put(
 ); 
 ```
 
-To build a middleware you don't have to always build your functions beforehand. If you don't intend to re-use a function, you can pass it directly to the `middleware()` method while mixing it with already-associated functions.
+To build a middleware you don't have to build your functions beforehand. If you don't intend to re-use a function, you can pass it directly to the `middleware()` method while mixing it with already-associated functions.
 
 ```js
 hrbac.addBoolFunc('is admin', (req, res) => req.user.role === 'admin');
@@ -163,7 +165,7 @@ So far we have used roles improperly. You should not provide functions checking 
 hrbac.addRole('admin');
 ```
 
-By so doing **expressive-hrbac** will automatically add a boolean function that checks for the `admin` role and associated it to label `admin`.
+By so doing **expressive-hrbac** will automatically add a boolean function that checks for the `admin` role and associates it to label `admin`.
 
 ```js
 hrbac.addRole('admin');
@@ -177,7 +179,7 @@ router.put(
 
 > **NOTE**: as soon as you define a role, you can NOT use the role string as a label for you custom functions.
 
-The role functions can be combined with other funcitons. You simply reference to it with the role string itself. For example here we provide access to `admin` or to any user with ID different from 10 (silly example!),.
+The role functions can be combined with other funcitons. You simply reference to it with the role string itself. For example here we provide access to `admin` or to any user with ID different from 10.
 
 ```js
 hrbac.addRole('admin');
@@ -197,7 +199,7 @@ router.put(
 By deafult, **expressive-hrbac** will look into `req.user.role` for the user role. You can change that behaviour providing a function that returns the role from the request object with method `addGetRoleFunc()`.
 
 ```js
-hrbac.addGetRoleFunc((req, res) => req.user.myRole);
+hrbac.addGetRoleFunc(async (req, res) => await getUserRole(req.user.id));
 
 hrbac.addRole('admin');
 
@@ -207,15 +209,17 @@ router.put(
   controller
 );
 ```
+Now, when a request arrives, `expressive-hrbac` will first apply your function provided with `addGetRoleFunc()` in order to extract the user role, and the will apply the role middleware checking if the role is `admin`.
 
 The role defined in the request object can be an array of roles. Meaning that a user can have multiple roles and **expressive-hrbac** will check if any one of them can be granted access.
 
 ```js
-// assume req.user.role = ['admin', 'blog_admin']
+// assume incoming request has property: req.user.role = ['admin', 'blog_admin']
 
 hrbac.addRole('admin');
 
-// Middleware below will GRANT access as user has role `admin` in its list of roles
+// Middleware below will GRANT access as user has
+// role `admin` in the list of user's roles
 router.put(
   '/blogs/:blogId/posts/:postId',
   hrbac.middleware('admin'),
@@ -227,9 +231,9 @@ router.put(
 By way of the the function provided with method `addGetRoleFunc()` or setting the request property `req.user.role` a valid role must be provided to the **expressive-hrbac** middleware. A valid role consists in a string representing the user role or an array of strings representing the user roles. In case no valid role is provided **expressive-hrbac** will call `next()` passing an instance of class `Error` set to HTTP error `401 Unauthorized` (see section [Errors](#errors) below).
 
 ### Role inheritance
-A role can have parent roles, inheriting all access permissions from each parent role. If access is not granted for the role, a second check will be attenped for each parent role, and for each parent role of each parent role and so on.
+A role can have one or more parent roles. The role will inherit all access permissions of each of its parent roles. If access is not granted for the role, a second check will be attenped for each parent role, and for each parent role of each parent role and so on.
 
-Inherited parents are declared as a second argument of the `addRole()` method.
+Role parents are declared as a second argument to the `addRole()` method.
 
 Suppose role `superadmin` should be able to access every resource that `admin` can access.
 
@@ -260,33 +264,7 @@ hrbac.addRole('superadmin', ['admin', 'blog_admin']);
 > **NOTE**: when the request object contains an array of roles, the inheritance will be activated for each role in the array.
 
 ## Singleton
-So far we have worked with single instances of the HRBAC class. This might not be what you usually want. Maybe you want to centralize your Access Control. To do so you can use the `getInstance()` method to get a singleton so that you can easily access your Access Control from anywhere in your application.
-
-<span style="color:gray">file1.js</span>
-```js
-const HRBAC = require('expressive-hrbac');
-
-let hrbac = HRBAC.getInstance();
-
-hrbac.addRole('admin');
-```
-
-<span style="color:gray">file2.js</span>
-```js
-const HRBAC = require('expressive-hrbac');
-
-let hrbac = HRBAC.getInstance();
-
-router.put(
-  '/blogs/:blogId/posts/:postId',
-  hrbac.middleware('admin'),
-  controller
-); 
-
-```
-
-### Named singletons
-In some cases you neither want a different instance each time you use your Access Control neither a unique singleton for the entire application. You might need to have to concentrate your Access Control in a few points of your application. In those cases you can use named singletons by simply passing a label to the `getInstance()` method. The first time you invoke the `getInstance()` method with a label, **expressive-hrbac** will create a new instance for you and then it will return it for each subsequent invocations with the same label.
+So far we have worked with single instances of the HRBAC class. This implies that the HRBAC instance that you create an configure in a script will not be available in another script of your application. This might not be what you want. Typically you want to centralize your Access Control. To do so you can use the `getInstance()` method to get a singleton so that you can easily access your Access Control from anywhere in your application.
 
 <span style="color:gray">file1.js</span>
 ```js
@@ -308,28 +286,48 @@ router.put(
   hrbac.middleware('admin'),
   controller
 ); 
+
+```
+
+Changing the label you provide to the `getInstance()` you can create as many instances of the HRBAC class accessible from any script file just providing the right label to `getIntance()`.
+
+<span style="color:gray">file1.js</span>
+```js
+const HRBAC = require('expressive-hrbac');
+
+let hrbacMain  = HRBAC.getInstance('main');
+hrbacMain.addRole('admin');
+
+let hrbacGroup = HRBAC.getInstance('groups');
+hrbacGroup.addRole('groupadmin');
+```
+
+<span style="color:gray">file2.js</span>
+```js
+const HRBAC = require('expressive-hrbac');
+
+let hrbac = HRBAC.getInstance('main');
+
+router.put(
+  '/blogs/:blogId/posts/:postId',
+  hrbac.middleware('admin'),
+  controller
+); 
+
 ```
 
 <span style="color:gray">file3.js</span>
 ```js
 const HRBAC = require('expressive-hrbac');
 
-let hrbac = HRBAC.getInstance('content');
-
-hrbac.addRole('admin');
-```
-
-<span style="color:gray">file4.js</span>
-```js
-const HRBAC = require('expressive-hrbac');
-
-let hrbac = HRBAC.getInstance('content');
+let hrbac = HRBAC.getInstance('groups');
 
 router.put(
-  '/blogs/:blogId/posts/:postId',
-  hrbac.middleware('admin'),
+  '/groups/:groupId',
+  hrbac.middleware('groupadmin'),
   controller
-);
+); 
+
 ```
 
 # Errors
@@ -393,6 +391,24 @@ Adds a function to get the role from the request object
 -   `NotAFunctionError`: when `func` is not a sync/async function.
 -   `ParameterNumberMismatchError`: when `func` does not take exactly 2 arguments.
 
+## isDescendant(descendant, ancestor)
+Informs if in currently configured HRBAC instance a role is descandant of another role
+
+**Parameters**:
+-   `descendant`: [**string**] - The descendant role string
+-   `ancestor`: [**string**] - The ancestor role string
+
+**Returns**:
+-   [**boolean**] `true` if `descendant` role is a descendant of `ancestor` role. `false` otherwise.
+
+**NOTE**: roles are NOT descendants of themselves.
+
+**Throws**:
+-   `UndefinedParameterError`: When `descendant` or `ancestor` is undefined.
+-   `NullParameterError`: When `descendant` or `ancestor` is null.
+-   `EmptyParameterError`: When `descendant` or `ancestor` is empty string.
+-   `NotAStringError`: when `descendant` or `ancestor` is not a string.
+-   `MissingRoleError`: If `descendant` or `ancestor` role has not been added yet.
 
 ## addBoolFunc(label, func)
 Adds a boolean function and associates it to the provided label
