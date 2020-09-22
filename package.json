@@ -12,8 +12,10 @@
     "url": "https://github.com/supergiulio2000/expressive-hrbac.git"
   },
   "keywords": [
+    "rbac",
     "hrbac",
     "acl",
+    "express",
     "expressjs",
     "router",
     "middleware",
