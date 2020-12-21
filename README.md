@@ -357,7 +357,7 @@ router.put(
 ); 
 ```
 
-In case of access denial the function you define with `addUnauthorizedErrorFunc()` will be called with a fourth argument conianing you extra argument.
+In case of access denial the function you defined with `addUnauthorizedErrorFunc()` will be called with a fourth argument containing your extra argument.
 
 ```js
 hrbac.addUnauthorizedErrorFunc(async (req, res, next, myData) => {
@@ -509,11 +509,12 @@ Returnes negated function
 -   `NotAFunctionError`: when `func` is not a string and it is not a sync/async function.
 -   `ParameterNumberMismatchError`: when `func` is not a string and it is not a function which takes exactly 2 arguments.
 
-## middleware(func)
+## middleware(func, userArg = null)
 Returns middleware function.
 
 **Parameters**:
 -   `func`: [**string | sync/async function**] - Function label or actual function
+-   `userArg`: (_optional_) [**any type**] - user-defined argument passed to error function in case of access denial
 
 **Returns**:
 -   [**sync/async function**] - middleware
@@ -552,7 +553,7 @@ Adds a function to handle access denials.
 -   `UndefinedParameterError`: When `func` is undefined.
 -   `NullParameterError`: When `func` is null.
 -   `NotAFunctionError`: when `func` is not a sync/async function.
--   `ParameterNumberMismatchError`: when `func` does not take exactly 3 arguments.
+-   `ParameterNumberMismatchError`: when `func` does not take 3 or 4 arguments.
 
 ## addCustomFunctionErrorFunc(func)
 Adds a function to handle errors with the boolean functions provided.
