@@ -346,6 +346,33 @@ hrbac.addUnauthorizedErrorFunc((req, res, next) => {
   next(err);
 })
 ```
+
+The `addUnauthorizedErrorFunc()` can also take a fourth argument to further customise, on a per-endpoint basis, the returned error in case of access denial. Start by passing a second argument to the `middleware()` function that defines an access control rule for an endpoint.
+
+```js
+router.put(
+  '/groups/:groupId',
+  hrbac.middleware('groupadmin', { userName: 'James', http: { code: 404, message = 'Not Found'}}),
+  controller
+); 
+```
+
+In case of access denial the function you define with `addUnauthorizedErrorFunc()` will be called with a fourth argument conianing you extra argument.
+
+```js
+hrbac.addUnauthorizedErrorFunc(async (req, res, next, myData) => {
+  let err = new Error();
+  if (await User.getName(req.user.id) === myData.name) {
+    err.message = myData.http.message;
+    err.status = myData.http.code;
+  } else {
+    err.message = 'Forbidden';
+    err.status = 403;
+  }
+  next(err);
+})
+```
+
 In case of errors in the custom functions added using method `addBoolFunc()` **expressive-hrbac** will call `next()` passing an instance of class `Error` set to HTTP error `500 Internal Server Error (<original error message>)` where `<original error message>` will be set to the message of the thrown internal message. You can change such behaviour providing a function to handle error in custom functions using method `addCustomFunctionErrorFunc()`. The first argument passed to `addCustomFunctionErrorFunc()` is the error thrown by the server due to the error in the custom function. In the example below we return HTTP `500 This is very bad! This is what happened: <original error message>`.
 
 ```js

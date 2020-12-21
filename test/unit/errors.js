@@ -63,12 +63,12 @@ describe('Errors', () => {
       expect(hrbac.addUnauthorizedErrorFunc.bind(hrbac, 5)).to.throw(NotAFunctionError);
     });
 
-    it('Function takes 3 arguments', async () => {
+    it('Function takes 3 or 4 arguments', async () => {
 
       expect(hrbac.addUnauthorizedErrorFunc.bind(hrbac, () => 5)).to.throw(ParameterNumberMismatchError);
       expect(hrbac.addUnauthorizedErrorFunc.bind(hrbac, (req) => 5)).to.throw(ParameterNumberMismatchError);
       expect(hrbac.addUnauthorizedErrorFunc.bind(hrbac, (req, res) => 5)).to.throw(ParameterNumberMismatchError);
-      expect(hrbac.addUnauthorizedErrorFunc.bind(hrbac, (req, res, next, ciccio) => 5)).to.throw(ParameterNumberMismatchError);
+      expect(hrbac.addUnauthorizedErrorFunc.bind(hrbac, (req, res, next, ciccio, rocco) => 5)).to.throw(ParameterNumberMismatchError);
     });
   });
 
@@ -128,6 +128,67 @@ describe('Errors', () => {
       expect(err).to.not.eql(null);
       expect(err.status).to.eql(403);
       expect(err.message).to.eql('Forbidden');
+    });
+  });
+
+  it('Throws HTTP custom error using user object as defined in the custom function if access is denied', async () => {
+
+    req = {
+      user: {
+        role: 'admino',
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    hrbac.addUnauthorizedErrorFunc((req, res, next, userObj) => {
+      let err = new Error();
+      err.message = 'Not Found';
+      err.status = userObj.customHttpCode;
+      next(err);
+    })
+
+    hrbac.addBoolFunc('func', (req, res) => req.user.role === 'admin');
+
+    middleware = hrbac.middleware('func', { customHttpCode: 404});
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+      expect(err.status).to.eql(404);
+      expect(err.message).to.eql('Not Found');
+    });
+  });
+
+
+  it('Throws HTTP custom error using user object as defined in the custom async function if access is denied', async () => {
+
+    req = {
+      user: {
+        role: 'admino',
+      },
+      route: {
+        path: '/admin/delete'
+      },
+      method: 'PUT',
+    };
+
+    hrbac.addUnauthorizedErrorFunc(async (req, res, next, userObj) => {
+      let err = new Error();
+      err.message = 'Not Found';
+      err.status = userObj.customHttpCode;
+      next(err);
+    })
+
+    hrbac.addBoolFunc('func', (req, res) => req.user.role === 'admin');
+
+    middleware = hrbac.middleware('func', { customHttpCode: 404});
+
+    await middleware(req, null, (err = null) => {
+      expect(err).to.not.eql(null);
+      expect(err.status).to.eql(404);
+      expect(err.message).to.eql('Not Found');
     });
   });
 
